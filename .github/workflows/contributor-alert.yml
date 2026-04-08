@@ -2,8 +2,8 @@ name: Contributor Inactivity Alert
 
 on:
   schedule:
-    - cron: '0 9 * * *'   # runs daily at 9 AM UTC
-  workflow_dispatch:        # manual trigger anytime
+    - cron: '0 9 * * 1-5'   # Mon–Fri at 9 AM UTC only
+  workflow_dispatch:
 
 permissions:
   issues: write
@@ -18,12 +18,34 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
-            const DAYS  = 2;
-            const since = new Date(
-              Date.now() - DAYS * 24 * 60 * 60 * 1000
+
+            // Skip if today is Saturday (6) or Sunday (0)
+            const todayUTC = new Date().getUTCDay();
+            if (todayUTC === 0 || todayUTC === 6) {
+              console.log('Weekend detected — skipping inactivity check.');
+              return;
+            }
+
+            // Count only business days back (skip weekends)
+            function subtractBusinessDays(date, days) {
+              let result = new Date(date);
+              let counted = 0;
+              while (counted < days) {
+                result.setUTCDate(result.getUTCDate() - 1);
+                const day = result.getUTCDay();
+                if (day !== 0 && day !== 6) counted++;
+              }
+              return result;
+            }
+
+            const BUSINESS_DAYS = 2;
+            const since = subtractBusinessDays(
+              new Date(), BUSINESS_DAYS
             ).toISOString();
 
-            // Get commits from last 2 days
+            console.log(`Checking commits since: ${since}`);
+
+            // Get commits within last 2 business days
             const { data: commits } = await github.rest.repos.listCommits({
               owner, repo, since, per_page: 100
             });
@@ -32,23 +54,23 @@ jobs:
               commits.map(c => c.author?.login).filter(Boolean)
             );
 
-            // Get all contributors
+            // Get all collaborators (includes members with 0 commits)
             const { data: collaborators } = await github.rest.repos
-                  .listCollaborators({ owner, repo, per_page: 100 });
+              .listCollaborators({ owner, repo, per_page: 100 });
 
             const inactive = collaborators.filter(
-                  c => !activeLogins.has(c.login)
-                );
+              c => !activeLogins.has(c.login)
+            );
 
             if (inactive.length === 0) {
-              console.log('All contributors active. No issues created.');
+              console.log('All collaborators active. No issues created.');
               return;
             }
 
-            // Check for already-open alerts to avoid duplicates
+            // Avoid duplicate open issues
             const { data: openIssues } = await github.rest.issues.listForRepo({
-              owner, repo, state: 'open', labels: 'inactivity-alert',
-              per_page: 100
+              owner, repo, state: 'open',
+              labels: 'inactivity-alert', per_page: 100
             });
             const alreadyAlerted = new Set(
               openIssues.map(i => i.title)
@@ -57,19 +79,16 @@ jobs:
             for (const user of inactive) {
               const title = `Inactivity alert: @${user.login}`;
               if (alreadyAlerted.has(title)) {
-                console.log(`Issue already open for ${user.login}, skipping.`);
+                console.log(`Already alerted: ${user.login}`);
                 continue;
               }
               await github.rest.issues.create({
-                owner, repo,
-                title,
+                owner, repo, title,
                 body: `## Contributor inactivity notice\n\n` +
                   `Hi @${user.login},\n\n` +
-                  `No commits have been detected from your account in the last ` +
-                  `**${DAYS} days** on this repository.\n\n` +
+                  `No commits detected in the last **${BUSINESS_DAYS} business days**.\n\n` +
                   `Please push an update or comment here if you are blocked.\n\n` +
-                  `> This issue was created automatically. ` +
-                  `It will be closed once you push a commit.`,
+                  `> This issue was auto-created and skips weekends.`,
                 labels: ['inactivity-alert'],
                 assignees: [user.login]
               });
