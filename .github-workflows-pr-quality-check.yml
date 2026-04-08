@@ -1,0 +1,282 @@
+# PR Quality Check Workflow
+# (c) 2026 Qorix
+#
+# This GitHub Actions workflow automatically checks Pull Request quality
+# based on the PR Report Card Dashboard guidelines.
+#
+# Installation:
+# 1. Copy this file to .github/workflows/pr-quality-check.yml in your repository
+# 2. Commit and push
+# 3. Workflow will run on all PR events
+
+name: PR Quality Check
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  quality-check:
+    name: Evaluate PR Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Check PR Template Completion
+        id: template-check
+        run: |
+          # Check if PR body is not empty and has reasonable content
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          if [ -z "$PR_BODY" ]; then
+            echo "❌ PR description is empty"
+            echo "template_filled=false" >> $GITHUB_OUTPUT
+            echo "template_score=0" >> $GITHUB_OUTPUT
+          elif [ ${#PR_BODY} -lt 50 ]; then
+            echo "⚠️ PR description is very short"
+            echo "template_filled=partial" >> $GITHUB_OUTPUT
+            echo "template_score=3" >> $GITHUB_OUTPUT
+          else
+            echo "✅ PR template appears to be filled"
+            echo "template_filled=true" >> $GITHUB_OUTPUT
+            echo "template_score=5" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check Issue/Ticket Link
+        id: issue-check
+        run: |
+          # Check if PR references an issue or ticket
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          if echo "$PR_BODY" | grep -qiE "(close[sd]?|fix(es|ed)?|resolve[sd]?) #[0-9]+|https?://[^\s]+/issues?/[0-9]+|JIRA-[0-9]+"; then
+            echo "✅ Issue/ticket reference found"
+            echo "issue_linked=true" >> $GITHUB_OUTPUT
+            echo "issue_score=5" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No issue reference found"
+            echo "issue_linked=false" >> $GITHUB_OUTPUT
+            echo "issue_score=0" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check PR Size
+        id: size-check
+        run: |
+          # Check if PR is reasonable size
+          ADDITIONS=${{ github.event.pull_request.additions }}
+          DELETIONS=${{ github.event.pull_request.deletions }}
+          TOTAL=$((ADDITIONS + DELETIONS))
+          
+          echo "Total lines changed: $TOTAL"
+          
+          if [ $TOTAL -gt 500 ]; then
+            echo "⚠️ PR is large ($TOTAL lines). Consider breaking it down."
+            echo "size_ok=false" >> $GITHUB_OUTPUT
+            echo "size_score=0" >> $GITHUB_OUTPUT
+          else
+            echo "✅ PR size is reasonable ($TOTAL lines)"
+            echo "size_ok=true" >> $GITHUB_OUTPUT
+            echo "size_score=5" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "total_lines=$TOTAL" >> $GITHUB_OUTPUT
+      
+      - name: Check Branch Naming
+        id: branch-check
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Branch name: $BRANCH"
+          
+          # Check if branch follows convention (feature/, bugfix/, hotfix/, etc.)
+          if echo "$BRANCH" | grep -qE "^(feature|feat|bugfix|fix|hotfix|refactor|docs|chore|test)/"; then
+            echo "✅ Branch naming follows convention"
+            echo "branch_valid=true" >> $GITHUB_OUTPUT
+            echo "branch_score=5" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Branch name should follow convention: feature/, bugfix/, etc."
+            echo "branch_valid=false" >> $GITHUB_OUTPUT
+            echo "branch_score=0" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check for Merge Conflicts
+        id: conflict-check
+        run: |
+          # Check if PR has merge conflicts
+          MERGEABLE="${{ github.event.pull_request.mergeable }}"
+          
+          if [ "$MERGEABLE" = "true" ]; then
+            echo "✅ No merge conflicts"
+            echo "conflicts=false" >> $GITHUB_OUTPUT
+            echo "conflict_score=5" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Merge conflicts detected"
+            echo "conflicts=true" >> $GITHUB_OUTPUT
+            echo "conflict_score=0" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check Commit Messages
+        id: commit-check
+        run: |
+          # Get commit messages for this PR
+          git fetch origin ${{ github.base_ref }}
+          COMMITS=$(git log --oneline origin/${{ github.base_ref }}..HEAD)
+          
+          # Check for conventional commit format or descriptive messages
+          if echo "$COMMITS" | grep -qE "^[a-f0-9]+ (feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+|^[a-f0-9]+ [A-Z].{20,}"; then
+            echo "✅ Commit messages appear descriptive"
+            echo "commits_ok=true" >> $GITHUB_OUTPUT
+            echo "commit_score=5" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Consider using more descriptive commit messages"
+            echo "commits_ok=false" >> $GITHUB_OUTPUT
+            echo "commit_score=3" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check for Breaking Changes
+        id: breaking-check
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          
+          # Check if breaking changes are documented
+          if echo "$PR_BODY" | grep -qiE "breaking change|breaking:"; then
+            echo "⚠️ Breaking changes detected - ensure they are documented"
+            echo "breaking_documented=true" >> $GITHUB_OUTPUT
+            echo "breaking_score=5" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No breaking changes mentioned"
+            echo "breaking_documented=none" >> $GITHUB_OUTPUT
+            echo "breaking_score=5" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Calculate Quality Score
+        id: score
+        run: |
+          # Calculate total score from all checks
+          TEMPLATE_SCORE=${{ steps.template-check.outputs.template_score }}
+          ISSUE_SCORE=${{ steps.issue-check.outputs.issue_score }}
+          SIZE_SCORE=${{ steps.size-check.outputs.size_score }}
+          BRANCH_SCORE=${{ steps.branch-check.outputs.branch_score }}
+          CONFLICT_SCORE=${{ steps.conflict-check.outputs.conflict_score }}
+          COMMIT_SCORE=${{ steps.commit-check.outputs.commit_score }}
+          BREAKING_SCORE=${{ steps.breaking-check.outputs.breaking_score }}
+          
+          # Maximum possible score (adjust based on checks)
+          MAX_SCORE=35
+          TOTAL_SCORE=$((TEMPLATE_SCORE + ISSUE_SCORE + SIZE_SCORE + BRANCH_SCORE + CONFLICT_SCORE + COMMIT_SCORE + BREAKING_SCORE))
+          
+          # Normalize to 100 scale
+          NORMALIZED_SCORE=$(( (TOTAL_SCORE * 100) / MAX_SCORE ))
+          
+          echo "score=$NORMALIZED_SCORE" >> $GITHUB_OUTPUT
+          echo "total_score=$TOTAL_SCORE" >> $GITHUB_OUTPUT
+          echo "max_score=$MAX_SCORE" >> $GITHUB_OUTPUT
+          
+          echo "📊 PR Quality Score: $NORMALIZED_SCORE/100 ($TOTAL_SCORE/$MAX_SCORE points)"
+      
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const score = ${{ steps.score.outputs.score }};
+            const totalScore = ${{ steps.score.outputs.total_score }};
+            const maxScore = ${{ steps.score.outputs.max_score }};
+            const totalLines = ${{ steps.size-check.outputs.total_lines }};
+            
+            // Determine rating and emoji
+            let rating, emoji, color;
+            if (score >= 90) {
+              rating = 'Excellent';
+              emoji = '🌟';
+              color = '🟢';
+            } else if (score >= 75) {
+              rating = 'Good';
+              emoji = '✅';
+              color = '🔵';
+            } else if (score >= 60) {
+              rating = 'Fair';
+              emoji = '⚠️';
+              color = '🟡';
+            } else {
+              rating = 'Needs Improvement';
+              emoji = '❌';
+              color = '🔴';
+            }
+            
+            const body = `## ${emoji} PR Quality Check - ${rating}
+            
+            **Score: ${color} ${score}/100** (${totalScore}/${maxScore} points)
+            
+            | Criteria | Status | Points |
+            |----------|--------|--------|
+            | PR Template Filled | ${{ steps.template-check.outputs.template_filled == 'true' ? '✅' : steps.template-check.outputs.template_filled == 'partial' ? '⚠️' : '❌' }} | ${{ steps.template-check.outputs.template_score }}/5 |
+            | Issue/Ticket Linked | ${{ steps.issue-check.outputs.issue_linked == 'true' ? '✅' : '⚠️' }} | ${{ steps.issue-check.outputs.issue_score }}/5 |
+            | Reasonable Size (${totalLines} lines) | ${{ steps.size-check.outputs.size_ok == 'true' ? '✅' : '⚠️' }} | ${{ steps.size-check.outputs.size_score }}/5 |
+            | Branch Naming Convention | ${{ steps.branch-check.outputs.branch_valid == 'true' ? '✅' : '⚠️' }} | ${{ steps.branch-check.outputs.branch_score }}/5 |
+            | No Merge Conflicts | ${{ steps.conflict-check.outputs.conflicts == 'false' ? '✅' : '❌' }} | ${{ steps.conflict-check.outputs.conflict_score }}/5 |
+            | Descriptive Commits | ${{ steps.commit-check.outputs.commits_ok == 'true' ? '✅' : '⚠️' }} | ${{ steps.commit-check.outputs.commit_score }}/5 |
+            | Breaking Changes Handled | ${{ steps.breaking-check.outputs.breaking_documented != 'none' ? '⚠️ Documented' : '✅ None' }} | ${{ steps.breaking-check.outputs.breaking_score }}/5 |
+            
+            ### 📋 Automated Checks Only
+            
+            This is an automated quality check covering basic criteria. For complete evaluation:
+            
+            1. Complete a full review using the **PR Report Card Dashboard**
+            2. Evaluate all 20 guidelines (Documentation, Quality, Process, Security, Best Practices)
+            3. Record the comprehensive score in the dashboard
+            
+            ### 💡 Recommendations
+            
+            ${{ score >= 90 ? '🎉 Excellent work! This PR meets all automated quality checks.' : '' }}
+            ${{ score >= 75 && score < 90 ? '👍 Good job! Address the warnings above to achieve excellence.' : '' }}
+            ${{ score >= 60 && score < 75 ? '⚠️ This PR needs improvement. Please address the issues marked above.' : '' }}
+            ${{ score < 60 ? '❌ This PR requires significant work before it can be approved. Please review all failing checks.' : '' }}
+            
+            ---
+            
+            *Automated by PR Quality Check workflow - See [PR Report Card Dashboard](../PR_ReportCard/index.html) for complete evaluation*`;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('PR Quality Check')
+            );
+            
+            // Update or create comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
+      
+      - name: Set Status Check
+        if: always()
+        run: |
+          SCORE=${{ steps.score.outputs.score }}
+          
+          if [ $SCORE -ge 75 ]; then
+            echo "✅ Quality check passed (score: $SCORE)"
+            exit 0
+          else
+            echo "⚠️ Quality check needs attention (score: $SCORE)"
+            # Don't fail the workflow, just warn
+            exit 0
+          fi
