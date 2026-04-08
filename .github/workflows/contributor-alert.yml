@@ -2,31 +2,34 @@ name: Contributor Inactivity Alert
 
 on:
   schedule:
-    - cron: '0 9 * * 1-5'   # Mon–Fri at 9 AM UTC only
-  workflow_dispatch:
+    - cron: '0 9 * * 1-5'   # Mon–Fri at 9 AM UTC
+  workflow_dispatch:          # manual trigger anytime
 
 permissions:
   issues: write
+  contents: read
+  pull-requests: read
 
 jobs:
   check-inactivity:
     runs-on: ubuntu-latest
     steps:
-      - name: Check inactive contributors and open issues
+      - name: Open and auto-close inactivity issues
         uses: actions/github-script@v8
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const owner = context.repo.owner;
             const repo  = context.repo.repo;
 
-            // Skip if today is Saturday (6) or Sunday (0)
+            // Skip weekends (0 = Sunday, 6 = Saturday)
             const todayUTC = new Date().getUTCDay();
             if (todayUTC === 0 || todayUTC === 6) {
-              console.log('Weekend detected — skipping inactivity check.');
+              console.log('Weekend — skipping inactivity check.');
               return;
             }
 
-            // Count only business days back (skip weekends)
+            // Count back only business days
             function subtractBusinessDays(date, days) {
               let result = new Date(date);
               let counted = 0;
@@ -45,50 +48,106 @@ jobs:
 
             console.log(`Checking commits since: ${since}`);
 
-            // Get commits within last 2 business days
-            const { data: commits } = await github.rest.repos.listCommits({
-              owner, repo, since, per_page: 100
+            // Get all branches
+            const { data: branches } = await github.rest.repos.listBranches({
+              owner, repo, per_page: 100
             });
 
-            const activeLogins = new Set(
-              commits.map(c => c.author?.login).filter(Boolean)
-            );
+            console.log(`Branches: ${branches.map(b => b.name).join(', ')}`);
 
-            // Get all collaborators (includes members with 0 commits)
-            const { data: collaborators } = await github.rest.repos
-              .listCollaborators({ owner, repo, per_page: 100 });
-
-            const inactive = collaborators.filter(
-              c => !activeLogins.has(c.login)
-            );
-
-            if (inactive.length === 0) {
-              console.log('All collaborators active. No issues created.');
-              return;
+            // Collect active logins from ALL branches
+            const activeLogins = new Set();
+            for (const branch of branches) {
+              try {
+                const { data: commits } = await github.rest.repos.listCommits({
+                  owner, repo, sha: branch.name, since, per_page: 100
+                });
+                commits
+                  .map(c => c.author?.login)
+                  .filter(Boolean)
+                  .forEach(login => activeLogins.add(login));
+              } catch (err) {
+                console.log(`Skipping branch ${branch.name}: ${err.message}`);
+              }
             }
 
-            // Avoid duplicate open issues
+            console.log(`Active: ${[...activeLogins].join(', ') || 'none'}`);
+
+            // ── STEP 1: AUTO-CLOSE resolved issues ──
             const { data: openIssues } = await github.rest.issues.listForRepo({
               owner, repo, state: 'open',
               labels: 'inactivity-alert', per_page: 100
             });
+
+            for (const issue of openIssues) {
+              // Extract username from title "Inactivity alert: @username"
+              const match = issue.title.match(/Inactivity alert: @(.+)/);
+              if (!match) continue;
+              const login = match[1];
+
+              if (activeLogins.has(login)) {
+                // Contributor is now active — close the issue
+                await github.rest.issues.createComment({
+                  owner, repo,
+                  issue_number: issue.number,
+                  body: `Activity detected from @${login}. ` +
+                    `This issue is being automatically closed.\n\n` +
+                    `> Commits found across repository branches ` +
+                    `within the last ${BUSINESS_DAYS} business days.`
+                });
+                await github.rest.issues.update({
+                  owner, repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+                console.log(`Auto-closed issue for: ${login}`);
+              }
+            }
+
+            // ── STEP 2: OPEN new issues for inactive contributors ──
+            const { data: contributors } = await github.rest.repos
+              .listContributors({ owner, repo, per_page: 100 });
+
+            const BOT_LOGINS = ['copilot', 'github-actions', 'dependabot'];
+            const inactive = contributors.filter(
+              c => !activeLogins.has(c.login) &&
+                   c.type !== 'Bot' &&
+                   !BOT_LOGINS.includes(c.login.toLowerCase())
+            );
+
+            if (inactive.length === 0) {
+              console.log('All contributors active. No new issues needed.');
+              return;
+            }
+
+            console.log(`Inactive: ${inactive.map(u => u.login).join(', ')}`);
+
+            // Re-fetch open issues after closures above
+            const { data: stillOpenIssues } = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open',
+              labels: 'inactivity-alert', per_page: 100
+            });
             const alreadyAlerted = new Set(
-              openIssues.map(i => i.title)
+              stillOpenIssues.map(i => i.title)
             );
 
             for (const user of inactive) {
               const title = `Inactivity alert: @${user.login}`;
               if (alreadyAlerted.has(title)) {
-                console.log(`Already alerted: ${user.login}`);
+                console.log(`Already alerted: ${user.login} — skipping.`);
                 continue;
               }
               await github.rest.issues.create({
                 owner, repo, title,
                 body: `## Contributor inactivity notice\n\n` +
                   `Hi @${user.login},\n\n` +
-                  `No commits detected in the last **${BUSINESS_DAYS} business days**.\n\n` +
-                  `Please push an update or comment here if you are blocked.\n\n` +
-                  `> This issue was auto-created and skips weekends.`,
+                  `No commits have been detected from your account ` +
+                  `in the last **${BUSINESS_DAYS} business days** ` +
+                  `across **any branch** of **${repo}**.\n\n` +
+                  `Please push an update or comment below ` +
+                  `if you are blocked.\n\n` +
+                  `> This issue will be **automatically closed** ` +
+                  `once a commit is detected from your account.`,
                 labels: ['inactivity-alert'],
                 assignees: [user.login]
               });
