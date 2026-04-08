@@ -1,0 +1,128 @@
+name: Contributor Inactivity Alert
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # runs daily at 9 AM UTC
+  workflow_dispatch:        # allow manual trigger
+
+jobs:
+  check-inactivity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check inactive contributors & send alerts
+        uses: actions/github-script@v7
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
+          CONTRIBUTOR_EMAIL_MAP: ${{ secrets.CONTRIBUTOR_EMAIL_MAP }}
+          INACTIVITY_DAYS: "2"
+        with:
+          script: |
+            const { execSync } = require('child_process');
+            const https = require('https');
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const days = parseInt(process.env.INACTIVITY_DAYS);
+            const since = new Date(Date.now() - days * 86400000).toISOString();
+
+            // Fetch recent commits
+            const { data: commits } = await github.rest.repos.listCommits({
+              owner, repo, since, per_page: 100
+            });
+
+            const activeAuthors = new Set(
+              commits.map(c => c.author?.login).filter(Boolean)
+            );
+
+            // Fetch all contributors
+            const { data: contributors } = await github.rest.repos.listContributors({
+              owner, repo, per_page: 100
+            });
+
+            const emailMap = JSON.parse(process.env.CONTRIBUTOR_EMAIL_MAP || '{}');
+            const adminEmails = process.env.ADMIN_EMAILS.split(',').map(e => e.trim());
+            const inactive = contributors.filter(c => !activeAuthors.has(c.login));
+
+            if (inactive.length === 0) {
+              console.log('All contributors are active. No alerts sent.');
+              return;
+            }
+
+            // Send email via SendGrid
+            function sendEmail(to, subject, html) {
+              const body = JSON.stringify({
+                personalizations: [{ to: [{ email: to }] }],
+                from: { email: 'alerts@yourorg.com', name: 'Repo Bot' },
+                subject, content: [{ type: 'text/html', value: html }]
+              });
+              return new Promise((resolve, reject) => {
+                const req = https.request({
+                  hostname: 'api.sendgrid.com',
+                  path: '/v3/mail/send', method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+                    'Content-Type': 'application/json'
+                  }
+                }, res => resolve(res.statusCode));
+                req.on('error', reject);
+                req.write(body); req.end();
+              });
+            }
+
+            for (const user of inactive) {
+              const email = emailMap[user.login];
+              if (email) {
+                const html = `
+
+Hi ${user.login},
+
+
+                  
+
+You haven't committed to ${repo} in the last ${days} days.
+
+
+                  
+
+Please push an update or let your team know if you're blocked.
+
+
+                  
+
+View repository
+
+`;
+                await sendEmail(email, `Action needed: No commits in ${days} days`, html);
+                console.log(`Notified contributor: ${user.login}`);
+              }
+            }
+
+            // Notify admins
+            const inactiveList = inactive.map(u =>
+              `
+${u.login} — ${u.contributions} total commits
+`
+            ).join('');
+            const adminHtml = `
+              
+
+${inactive.length} contributor(s) haven't committed to
+              ${repo} in the last ${days} days:
+
+
+              
+${inactiveList}
+
+              
+
+
+              View contributor graph
+
+`;
+
+            for (const admin of adminEmails) {
+              await sendEmail(admin,
+                `[${repo}] ${inactive.length} inactive contributor(s)`, adminHtml);
+            }
+            console.log(`Admin summary sent to ${adminEmails.length} admins.`);
