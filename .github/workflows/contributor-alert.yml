@@ -55,21 +55,38 @@ jobs:
 
             console.log(`Branches: ${branches.map(b => b.name).join(', ')}`);
 
-            // Collect active logins from ALL branches
+            // FIX 1: Collect active logins from ALL branches
+            // Now captures BOTH author AND committer logins to handle
+            // cases where git email is not linked to a GitHub account.
             const activeLogins = new Set();
             for (const branch of branches) {
               try {
                 const { data: commits } = await github.rest.repos.listCommits({
                   owner, repo, sha: branch.name, since, per_page: 100
                 });
-                commits
-                  .map(c => c.author?.login)
-                  .filter(Boolean)
-                  .forEach(login => activeLogins.add(login));
+
+                // Debug log every commit to help diagnose null logins
+                commits.forEach(c => {
+                  console.log(
+                    `Commit ${c.sha.slice(0, 7)} on ${branch.name} | ` +
+                    `author.login: ${c.author?.login ?? 'null'} | ` +
+                    `committer.login: ${c.committer?.login ?? 'null'} | ` +
+                    `git email: ${c.commit.author.email}`
+                  );
+                  // Capture both author and committer so we don't miss
+                  // commits where only one side has a linked GitHub account
+                  if (c.author?.login)    activeLogins.add(c.author.login);
+                  if (c.committer?.login) activeLogins.add(c.committer.login);
+                });
               } catch (err) {
                 console.log(`Skipping branch ${branch.name}: ${err.message}`);
               }
             }
+
+            // FIX 2: Strip the well-known GitHub Actions bot login that
+            // appears as committer on every squash/merge commit so it
+            // never pollutes the active set.
+            activeLogins.delete('web-flow'); // GitHub's merge committer login
 
             console.log(`Active: ${[...activeLogins].join(', ') || 'none'}`);
 
@@ -80,17 +97,26 @@ jobs:
             });
 
             for (const issue of openIssues) {
-              // Extract username from title "Inactivity alert: @username"
-              const match = issue.title.match(/Inactivity alert: @(.+)/);
+              // FIX 3: Case-insensitive username comparison.
+              // GitHub logins are case-insensitive; the stored title may
+              // differ in casing from the API-returned login.
+              const match = issue.title.match(/Inactivity alert: @(.+)/i);
               if (!match) continue;
-              const login = match[1];
+              const login = match[1].toLowerCase();
 
-              if (activeLogins.has(login)) {
-                // Contributor is now active — close the issue
+              const isActive = [...activeLogins].some(
+                l => l.toLowerCase() === login
+              );
+
+              if (isActive) {
+                // Resolve the exact-cased login for the comment mention
+                const resolvedLogin = [...activeLogins].find(
+                  l => l.toLowerCase() === login
+                );
                 await github.rest.issues.createComment({
                   owner, repo,
                   issue_number: issue.number,
-                  body: `Activity detected from @${login}. ` +
+                  body: `Activity detected from @${resolvedLogin}. ` +
                     `This issue is being automatically closed.\n\n` +
                     `> Commits found across repository branches ` +
                     `within the last ${BUSINESS_DAYS} business days.`
@@ -100,7 +126,7 @@ jobs:
                   issue_number: issue.number,
                   state: 'closed'
                 });
-                console.log(`Auto-closed issue for: ${login}`);
+                console.log(`Auto-closed issue for: ${resolvedLogin}`);
               }
             }
 
@@ -108,9 +134,11 @@ jobs:
             const { data: contributors } = await github.rest.repos
               .listContributors({ owner, repo, per_page: 100 });
 
-            const BOT_LOGINS = ['copilot', 'github-actions', 'dependabot'];
+            const BOT_LOGINS = ['copilot', 'github-actions', 'dependabot', 'web-flow'];
             const inactive = contributors.filter(
-              c => !activeLogins.has(c.login) &&
+              c => !([...activeLogins].some(
+                       l => l.toLowerCase() === c.login.toLowerCase()
+                     )) &&
                    c.type !== 'Bot' &&
                    !BOT_LOGINS.includes(c.login.toLowerCase())
             );
@@ -127,13 +155,16 @@ jobs:
               owner, repo, state: 'open',
               labels: 'inactivity-alert', per_page: 100
             });
+
+            // FIX 4: Case-insensitive duplicate check so we don't open a
+            // second issue if the title casing drifted between runs.
             const alreadyAlerted = new Set(
-              stillOpenIssues.map(i => i.title)
+              stillOpenIssues.map(i => i.title.toLowerCase())
             );
 
             for (const user of inactive) {
               const title = `Inactivity alert: @${user.login}`;
-              if (alreadyAlerted.has(title)) {
+              if (alreadyAlerted.has(title.toLowerCase())) {
                 console.log(`Already alerted: ${user.login} — skipping.`);
                 continue;
               }
