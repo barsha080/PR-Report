@@ -1,7 +1,8 @@
 name: Requirements Review
 description: SRS / Requirements Review Checklist
 title: "[RR] QD-XXX Requirements Review"
-labels: ["requirement review"]
+labels:
+  - "requirement review"
 
 body:
 
@@ -23,8 +24,9 @@ body:
 
   # ---------------- GENERAL ----------------
   - type: checkboxes
+    id: general_checks
     attributes:
-      label: General
+      label: "✅ General"
       options:
         - label: Document is as per template
         - label: Title page updated (title, version, date, config ID)
@@ -33,20 +35,42 @@ body:
         - label: Abbreviations & definitions identified
         - label: Reference documents identified
 
+  - type: textarea
+    id: general_findings
+    attributes:
+      label: "📝 General — Findings"
+      description: "Note any defects or observations for the General section"
+      placeholder: |
+        e.g.
+        - [ ] Title page is missing config ID → Author: John
+        - [ ] Version history not updated → Author: Jane
+
   # ---------------- FORMATTING ----------------
   - type: checkboxes
+    id: formatting_checks
     attributes:
-      label: Formatting & Structure
+      label: "✅ Formatting & Structure"
       options:
         - label: Proper alignment maintained
         - label: Hyperlinks are correct
         - label: Font & size as per template
         - label: No spelling/grammar issues
 
+  - type: textarea
+    id: formatting_findings
+    attributes:
+      label: "📝 Formatting & Structure — Findings"
+      description: "Note any defects or observations for Formatting"
+      placeholder: |
+        e.g.
+        - [ ] Section 3.2 font size inconsistent → Author: Jane
+        - [ ] Hyperlink on page 5 is broken → Author: John
+
   # ---------------- REQUIREMENT QUALITY ----------------
   - type: checkboxes
+    id: quality_checks
     attributes:
-      label: Requirement Quality
+      label: "✅ Requirement Quality"
       options:
         - label: Requirements are clear and unambiguous
         - label: No conflicting requirements
@@ -54,24 +78,56 @@ body:
         - label: Acceptance criteria defined
         - label: Edge cases considered
 
+  - type: textarea
+    id: quality_findings
+    attributes:
+      label: "📝 Requirement Quality — Findings"
+      description: "Note any defects or observations for Requirement Quality"
+      placeholder: |
+        e.g.
+        - [ ] REQ-005 acceptance criteria missing → Author: John
+        - [ ] REQ-012 conflicts with REQ-008 → Author: Jane
+
   # ---------------- COMPLETENESS ----------------
   - type: checkboxes
+    id: completeness_checks
     attributes:
-      label: Completeness
+      label: "✅ Completeness"
       options:
         - label: All functional requirements captured
         - label: Non-functional requirements included
         - label: Dependencies identified
         - label: Assumptions documented
 
+  - type: textarea
+    id: completeness_findings
+    attributes:
+      label: "📝 Completeness — Findings"
+      description: "Note any defects or observations for Completeness"
+      placeholder: |
+        e.g.
+        - [ ] Performance NFR not addressed → Author: John
+        - [ ] External system dependency missing → Author: Jane
+
   # ---------------- TRACEABILITY ----------------
   - type: checkboxes
+    id: traceability_checks
     attributes:
-      label: Traceability
+      label: "✅ Traceability"
       options:
         - label: Requirements mapped to Feature / User Story
         - label: Traceability maintained
         - label: No orphan requirements
+
+  - type: textarea
+    id: traceability_findings
+    attributes:
+      label: "📝 Traceability — Findings"
+      description: "Note any defects or observations for Traceability"
+      placeholder: |
+        e.g.
+        - [ ] REQ-017 has no linked user story → Author: Jane
+        - [ ] REQ-021 is orphaned → Author: John
 
   # ---------------- REVIEW RESULT ----------------
   - type: dropdown
@@ -88,5 +144,5 @@ body:
   - type: textarea
     id: comments
     attributes:
-      label: Review Comments
-      description: Add review findings / defects
+      label: Overall Review Comments
+      description: Summary of all findings / defects across sections
