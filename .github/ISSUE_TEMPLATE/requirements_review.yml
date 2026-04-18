@@ -1,33 +1,92 @@
 name: Requirements Review
-description: Review checklist for requirements
+description: SRS / Requirements Review Checklist
 title: "[RR] PROJ-XXX Requirements Review"
 labels: ["requirements-review"]
 
 body:
+
   - type: input
     id: jira
     attributes:
       label: Jira Sub-task ID
-      description: Enter Jira ID (e.g., PROJ-123)
       placeholder: PROJ-123
     validations:
       required: true
 
   - type: textarea
-    id: description
+    id: scope
     attributes:
-      label: Description
-      description: Describe what is being reviewed
+      label: Scope of Review
+      description: What feature / module is being reviewed
     validations:
       required: true
 
+  # ---------------- GENERAL ----------------
   - type: checkboxes
-    id: checklist
     attributes:
-      label: Requirements Checklist
+      label: General
       options:
-        - label: Requirements clearly defined
-        - label: Acceptance criteria complete
-        - label: Edge cases covered
+        - label: Document is as per template
+        - label: Title page updated (title, version, date, config ID)
+        - label: Document change history is maintained
+        - label: Introduction section is clear
+        - label: Abbreviations & definitions identified
+        - label: Reference documents identified
+
+  # ---------------- FORMATTING ----------------
+  - type: checkboxes
+    attributes:
+      label: Formatting & Structure
+      options:
+        - label: Proper alignment maintained
+        - label: Hyperlinks are correct
+        - label: Font & size as per template
+        - label: No spelling/grammar issues
+
+  # ---------------- REQUIREMENT QUALITY ----------------
+  - type: checkboxes
+    attributes:
+      label: Requirement Quality
+      options:
+        - label: Requirements are clear and unambiguous
+        - label: No conflicting requirements
+        - label: Requirements are testable
+        - label: Acceptance criteria defined
+        - label: Edge cases considered
+
+  # ---------------- COMPLETENESS ----------------
+  - type: checkboxes
+    attributes:
+      label: Completeness
+      options:
+        - label: All functional requirements captured
+        - label: Non-functional requirements included
         - label: Dependencies identified
-        - label: Test scenarios considered
+        - label: Assumptions documented
+
+  # ---------------- TRACEABILITY ----------------
+  - type: checkboxes
+    attributes:
+      label: Traceability
+      options:
+        - label: Requirements mapped to Feature / User Story
+        - label: Traceability maintained
+        - label: No orphan requirements
+
+  # ---------------- REVIEW RESULT ----------------
+  - type: dropdown
+    id: result
+    attributes:
+      label: Review Result
+      options:
+        - Approved
+        - Approved with comments
+        - Rework required
+    validations:
+      required: true
+
+  - type: textarea
+    id: comments
+    attributes:
+      label: Review Comments
+      description: Add review findings / defects
