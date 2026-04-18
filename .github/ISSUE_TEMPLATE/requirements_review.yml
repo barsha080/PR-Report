@@ -1,18 +1,33 @@
 name: Requirements Review
-description: Checklist for reviewing requirements
-title: "[RR] <Feature/Story Name>"
+description: Review checklist for requirements
+title: "[RR] PROJ-XXX Requirements Review"
 labels: ["requirements-review"]
+
 body:
-  - type: markdown
-    value: "## Requirements Review Checklist"
+  - type: input
+    id: jira
+    attributes:
+      label: Jira Sub-task ID
+      description: Enter Jira ID (e.g., PROJ-123)
+      placeholder: PROJ-123
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what is being reviewed
+    validations:
+      required: true
 
   - type: checkboxes
+    id: checklist
     attributes:
-      label: Review Items
+      label: Requirements Checklist
       options:
         - label: Requirements clearly defined
         - label: Acceptance criteria complete
         - label: Edge cases covered
         - label: Dependencies identified
         - label: Test scenarios considered
-        - label: Approved by stakeholders
