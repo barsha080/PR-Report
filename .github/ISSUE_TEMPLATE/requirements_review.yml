@@ -39,11 +39,8 @@ body:
     id: general_findings
     attributes:
       label: "📝 General — Findings"
-      description: "Note any defects or observations for the General section"
-      placeholder: |
-        e.g.
-        - [ ] Title page is missing config ID → Author: John
-        - [ ] Version history not updated → Author: Jane
+      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
+      placeholder: "- [ ] Finding → Author: Name"
 
   # ---------------- FORMATTING ----------------
   - type: checkboxes
@@ -60,11 +57,8 @@ body:
     id: formatting_findings
     attributes:
       label: "📝 Formatting & Structure — Findings"
-      description: "Note any defects or observations for Formatting"
-      placeholder: |
-        e.g.
-        - [ ] Section 3.2 font size inconsistent → Author: Jane
-        - [ ] Hyperlink on page 5 is broken → Author: John
+      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
+      placeholder: "- [ ] Finding → Author: Name"
 
   # ---------------- REQUIREMENT QUALITY ----------------
   - type: checkboxes
@@ -82,11 +76,8 @@ body:
     id: quality_findings
     attributes:
       label: "📝 Requirement Quality — Findings"
-      description: "Note any defects or observations for Requirement Quality"
-      placeholder: |
-        e.g.
-        - [ ] REQ-005 acceptance criteria missing → Author: John
-        - [ ] REQ-012 conflicts with REQ-008 → Author: Jane
+      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
+      placeholder: "- [ ] Finding → Author: Name"
 
   # ---------------- COMPLETENESS ----------------
   - type: checkboxes
@@ -103,11 +94,8 @@ body:
     id: completeness_findings
     attributes:
       label: "📝 Completeness — Findings"
-      description: "Note any defects or observations for Completeness"
-      placeholder: |
-        e.g.
-        - [ ] Performance NFR not addressed → Author: John
-        - [ ] External system dependency missing → Author: Jane
+      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
+      placeholder: "- [ ] Finding → Author: Name"
 
   # ---------------- TRACEABILITY ----------------
   - type: checkboxes
@@ -123,11 +111,8 @@ body:
     id: traceability_findings
     attributes:
       label: "📝 Traceability — Findings"
-      description: "Note any defects or observations for Traceability"
-      placeholder: |
-        e.g.
-        - [ ] REQ-017 has no linked user story → Author: Jane
-        - [ ] REQ-021 is orphaned → Author: John
+      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
+      placeholder: "- [ ] Finding → Author: Name"
 
   # ---------------- REVIEW RESULT ----------------
   - type: dropdown
