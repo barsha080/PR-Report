@@ -1,0 +1,18 @@
+name: Requirements Review
+description: Checklist for reviewing requirements
+title: "[RR] <Feature/Story Name>"
+labels: ["requirements-review"]
+body:
+  - type: markdown
+    value: "## Requirements Review Checklist"
+
+  - type: checkboxes
+    attributes:
+      label: Review Items
+      options:
+        - label: Requirements clearly defined
+        - label: Acceptance criteria complete
+        - label: Edge cases covered
+        - label: Dependencies identified
+        - label: Test scenarios considered
+        - label: Approved by stakeholders
