@@ -49,29 +49,11 @@ body:
     validations:
       required: true
 
-  - type: dropdown
+  - type: input
     id: author
     attributes:
       label: Author (Document Owner)
-      options:
-        - Indranil Saha
-        - Janekallu Raghukumar
-        - Mayur Agarwal
-        - Pranavi Patil
-        - Dhanush K
-        - Sudheendra Desai
-        - Rohit Malla
-        - Sumegh Thale
-        - Utsav
-        - Sridhar
-        - Syeeda
-        - Ananda Nadarajan S
-        - Saraswati Chaurasiya
-        - Shiva Kakkirala
-        - Hiteshwar Molabanti
-        - Barsha Sahi
-        - Suresh Chamuah
-        - Ciby Bastian
+      placeholder: "Your name"
     validations:
       required: true
 
@@ -79,25 +61,9 @@ body:
     id: reviewer
     attributes:
       label: Assigned Reviewer
+      description: "Select the reviewer's GitHub username. Also assign them via the Assignees sidebar (top-right) so they get a notification."
       options:
-        - Indranil Saha
-        - Janekallu Raghukumar
-        - Mayur Agarwal
-        - Pranavi Patil
-        - Dhanush K
-        - Sudheendra Desai
-        - Rohit Malla
-        - Sumegh Thale
-        - Utsav
-        - Sridhar
-        - Syeeda
-        - Ananda Nadarajan S
-        - Saraswati Chaurasiya
-        - Shiva Kakkirala
-        - Hiteshwar Molabanti
-        - Barsha Sahi
-        - Suresh Chamuah
-        - Ciby Bastian
+        - pending-sync
     validations:
       required: true
 

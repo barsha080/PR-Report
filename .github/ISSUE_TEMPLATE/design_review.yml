@@ -60,8 +60,7 @@ body:
     id: author
     attributes:
       label: Author (Document Owner)
-      description: "Auto-filled with your GitHub username when the issue is created. Do not edit."
-      value: "<!-- REPORTER -->"
+      placeholder: "Your name"
     validations:
       required: true
 
