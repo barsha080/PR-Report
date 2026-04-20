@@ -1,0 +1,40 @@
+# (c) Qorix 2026
+# GitHub Actions workflow to auto-fill the Author (Document Owner) field
+# in Requirements Review and Design Review issues with the reporter's GitHub username.
+#
+# Deploy to: .github/workflows/auto-fill-author.yml
+
+name: Auto-fill Issue Author
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  fill-author:
+    # Run for requirement review and design review issues
+    if: contains(github.event.issue.labels.*.name, 'requirement review') || contains(github.event.issue.labels.*.name, 'design review')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Replace author placeholder with reporter GitHub username
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const reporter = '@' + issue.user.login;
+
+            // Replace the <!-- REPORTER --> placeholder injected by the issue form template
+            const newBody = (issue.body || '').replace('<!-- REPORTER -->', reporter);
+
+            if (newBody !== issue.body) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: newBody
+              });
+              core.info(`Author field updated to ${reporter} in issue #${issue.number}`);
+            }
