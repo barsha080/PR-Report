@@ -1,4 +1,4 @@
-name: Review Automation
+name: Review Workflow Automation
 
 on:
   issues:
@@ -8,17 +8,18 @@ permissions:
   issues: write
 
 jobs:
-  auto-review-comment:
-    if: github.event.label.name == 'in-review'
+  review-automation:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Add Review Comment
+      - name: Run Automation
         uses: actions/github-script@v7
         with:
           script: |
             const issue_number = context.issue.number;
+            const label = context.payload.label.name;
 
+            // Get comments to calculate round
             const comments = await github.rest.issues.listComments({
               ...context.repo,
               issue_number
@@ -33,23 +34,70 @@ jobs:
 
             const today = new Date().toISOString().split('T')[0];
 
-            const body =
-            "## 🔍 Round " + round + " Review — [Reviewer Name] — " + today + " — Doc v[X.X]\n\n" +
+            let body = "";
 
-            "### 📝 Feedback\n" +
-            "- ID-1 — [Finding] — Open\n" +
-            "- ID-2 — [Finding] — Accepted\n" +
-            "- ID-3 — [Finding] — Rejected\n\n" +
+            // 🔍 REVIEW START
+            if (label === "in-review") {
+              body =
+              "## 🔍 Round " + round + " Review — [Reviewer Name] — " + today + " — Doc v[X.X]\n\n" +
 
-            "👉 Add more like:\n" +
-            "- ID-X — Finding — Open/Accepted/Rejected\n\n" +
+              "### 📝 Feedback\n" +
+              "- ID-1 — [Finding] — Open\n" +
+              "- ID-2 — [Finding] — Accepted\n" +
+              "- ID-3 — [Finding] — Rejected\n\n" +
 
-            "### 🏁 Decision\n" +
-            "- [ ] ✅ Approved\n" +
-            "- [ ] 🔴 Changes Requested";
+              "👉 Add more like:\n" +
+              "- ID-X — Finding — Open/Accepted/Rejected\n\n" +
 
-            await github.rest.issues.createComment({
-              ...context.repo,
-              issue_number,
-              body
-            });
+              "### 🏁 Decision\n" +
+              "- [ ] ✅ Approved\n" +
+              "- [ ] 🔴 Changes Requested";
+            }
+
+            // 🔧 AUTHOR RESPONSE
+            else if (label === "re-review-requested") {
+              body =
+              "## 🔧 Rework Complete — Round " + round + " Response — [Author Name] — " + today + " — Doc v[X.X]\n\n" +
+
+              "| Finding | Decision | Action Taken |\n" +
+              "|---------|----------|-------------|\n" +
+              "| ID-X — [finding] | ✅ Accepted | [what was done] |\n" +
+              "| ID-X — [finding] | ❌ Not Accepted | [rationale] |\n\n" +
+
+              "### 📄 Document Change Summary\n" +
+              "- Version: v[old] → v[new]\n" +
+              "- Changed sections: [list]\n" +
+              "- Disputed findings: [if any]\n\n" +
+
+              "### ➡️ Next Action\n" +
+              "- Assigning back to Reviewer for next round\n" +
+              "- Label: in-review";
+            }
+
+            // ✅ FINAL APPROVAL
+            else if (label === "approved") {
+              body =
+              "## ✅ Final Approval — [Reviewer Name] — " + today + " — Doc v[X.X]\n\n" +
+
+              "All findings have been addressed satisfactorily.\n\n" +
+
+              "| Metric | Value |\n" +
+              "|--------|-------|\n" +
+              "| Total Rounds | " + round + " |\n" +
+              "| Total Findings | [count] |\n" +
+              "| Accepted | [count] |\n" +
+              "| Rejected | [count] |\n" +
+              "| Final Version | v[X.X] |\n\n" +
+
+              "**Decision: ✅ APPROVED**\n\n" +
+              "Closing issue.";
+            }
+
+            // Post comment only if body exists
+            if (body) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number,
+                body
+              });
+            }
