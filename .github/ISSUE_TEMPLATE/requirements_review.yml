@@ -1,6 +1,6 @@
 name: Requirements Review
 description: SRS / Requirements Review Checklist
-title: "[RR] QD-XXX Requirements Review"
+title: "[Requirement TRC] QD-XXX Requirements Review"
 labels:
   - "requirement review"
 
@@ -22,18 +22,63 @@ body:
     validations:
       required: true
 
+  # ---------------- REVIEW METADATA TABLE ----------------
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 📋 Review Participants
+
+        | Role | Name | Date |
+        |------|------|------|
+        | **Author** (Document Owner) | _Fill in_ | _Fill in_ |
+        | **Reviewer** | _Fill in_ | _Fill in_ |
+
+        ---
+
+  - type: input
+    id: author
+    attributes:
+      label: Author (Document Owner)
+      placeholder: Full name of the document author
+    validations:
+      required: true
+
+  - type: input
+    id: reviewer
+    attributes:
+      label: Reviewer
+      placeholder: Full name of the reviewer
+    validations:
+      required: true
+
+  - type: input
+    id: review_date
+    attributes:
+      label: Review Date
+      placeholder: "YYYY-MM-DD"
+    validations:
+      required: true
+
+  - type: textarea
+    id: remarks
+    attributes:
+      label: General Remarks
+      description: Any general remarks or context before starting the review
+      placeholder: Add overall remarks here
+
   # ---------------- GENERAL ----------------
   - type: checkboxes
     id: general_checks
     attributes:
       label: "✅ General"
       options:
-        - label: Document is as per template
-        - label: Title page updated (title, version, date, config ID)
-        - label: Document change history is maintained
-        - label: Introduction section is clear
-        - label: Abbreviations & definitions identified
-        - label: Reference documents identified
+        - label: "SRS.1 — Document is as per template"
+        - label: "SRS.2 — Title page updated (title, version, date, config ID)"
+        - label: "SRS.3 — Document change history is maintained"
+        - label: "SRS.4 — Introduction section is clear"
+        - label: "SRS.5 — Abbreviations & definitions identified"
+        - label: "SRS.6 — Reference documents identified"
 
   - type: textarea
     id: general_findings
@@ -48,10 +93,10 @@ body:
     attributes:
       label: "✅ Formatting & Structure"
       options:
-        - label: Proper alignment maintained
-        - label: Hyperlinks are correct
-        - label: Font & size as per template
-        - label: No spelling/grammar issues
+        - label: "SRS.7 — Proper alignment maintained"
+        - label: "SRS.8 — Hyperlinks are correct"
+        - label: "SRS.9 — Font & size as per template"
+        - label: "SRS.10 — No spelling/grammar issues"
 
   - type: textarea
     id: formatting_findings
@@ -66,11 +111,11 @@ body:
     attributes:
       label: "✅ Requirement Quality"
       options:
-        - label: Requirements are clear and unambiguous
-        - label: No conflicting requirements
-        - label: Requirements are testable
-        - label: Acceptance criteria defined
-        - label: Edge cases considered
+        - label: "SRS.11 — Requirements are clear and unambiguous"
+        - label: "SRS.12 — No conflicting requirements"
+        - label: "SRS.13 — Requirements are testable"
+        - label: "SRS.14 — Acceptance criteria defined"
+        - label: "SRS.15 — Edge cases considered"
 
   - type: textarea
     id: quality_findings
@@ -85,10 +130,10 @@ body:
     attributes:
       label: "✅ Completeness"
       options:
-        - label: All functional requirements captured
-        - label: Non-functional requirements included
-        - label: Dependencies identified
-        - label: Assumptions documented
+        - label: "SRS.16 — All functional requirements captured"
+        - label: "SRS.17 — Non-functional requirements included"
+        - label: "SRS.18 — Dependencies identified"
+        - label: "SRS.19 — Assumptions documented"
 
   - type: textarea
     id: completeness_findings
@@ -103,9 +148,9 @@ body:
     attributes:
       label: "✅ Traceability"
       options:
-        - label: Requirements mapped to Feature / User Story
-        - label: Traceability maintained
-        - label: No orphan requirements
+        - label: "SRS.20 — Requirements mapped to Feature / User Story"
+        - label: "SRS.21 — Traceability maintained"
+        - label: "SRS.22 — No orphan requirements"
 
   - type: textarea
     id: traceability_findings
