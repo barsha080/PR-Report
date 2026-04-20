@@ -10,67 +10,59 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Generate Review Comment
+      - name: Add Review Comment
         uses: actions/github-script@v7
         with:
           script: |
             const issue_number = context.issue.number;
 
-            // 1. Get existing comments
             const comments = await github.rest.issues.listComments({
               ...context.repo,
               issue_number
             });
 
-            // 2. Count previous rounds
             let round = 1;
-            comments.data.forEach(c => {
-              if (c.body.includes("Round")) {
+            for (const c of comments.data) {
+              if (c.body && c.body.includes("Round")) {
                 round++;
               }
-            });
+            }
 
-            // 3. Get current date
             const today = new Date().toISOString().split('T')[0];
 
-            // 4. Template
-            const body = `
-## 🔍 Round ${round} Review — [Reviewer Name] — ${today} — Doc v[X.X]
+            const body = "## 🔍 Round " + round + " Review — [Reviewer Name] — " + today + " — Doc v[X.X]\n\n" +
+            "| ID | Checkpoint | Status | Finding / Remark |\n" +
+            "|----|-----------|--------|-----------------|\n" +
+            "| SRS.1 | Document is as per template | ⬜ | — |\n" +
+            "| SRS.2 | Title page updated | ⬜ | — |\n" +
+            "| SRS.3 | Document change history maintained | ⬜ | — |\n" +
+            "| SRS.4 | Introduction section is clear | ⬜ | — |\n" +
+            "| SRS.5 | Abbreviations & definitions identified | ⬜ | — |\n" +
+            "| SRS.6 | Reference documents identified | ⬜ | — |\n" +
+            "| SRS.7 | Proper alignment maintained | ⬜ | — |\n" +
+            "| SRS.8 | Hyperlinks are correct | ⬜ | — |\n" +
+            "| SRS.9 | Font & size as per template | ⬜ | — |\n" +
+            "| SRS.10 | No spelling/grammar issues | ⬜ | — |\n" +
+            "| SRS.11 | Requirements are clear and unambiguous | ⬜ | — |\n" +
+            "| SRS.12 | No conflicting requirements | ⬜ | — |\n" +
+            "| SRS.13 | Requirements are testable | ⬜ | — |\n" +
+            "| SRS.14 | Acceptance criteria defined | ⬜ | — |\n" +
+            "| SRS.15 | Edge cases considered | ⬜ | — |\n" +
+            "| SRS.16 | All functional requirements captured | ⬜ | — |\n" +
+            "| SRS.17 | Non-functional requirements included | ⬜ | — |\n" +
+            "| SRS.18 | Dependencies identified | ⬜ | — |\n" +
+            "| SRS.19 | Assumptions documented | ⬜ | — |\n" +
+            "| SRS.20 | Requirements mapped to Feature / User Story | ⬜ | — |\n" +
+            "| SRS.21 | Traceability maintained | ⬜ | — |\n" +
+            "| SRS.22 | No orphan requirements | ⬜ | — |\n\n" +
 
-| ID | Checkpoint | Status | Finding / Remark |
-|----|-----------|--------|-----------------|
-| SRS.1 | Document is as per template | ⬜ | — |
-| SRS.2 | Title page updated | ⬜ | — |
-| SRS.3 | Document change history maintained | ⬜ | — |
-| SRS.4 | Introduction section is clear | ⬜ | — |
-| SRS.5 | Abbreviations & definitions identified | ⬜ | — |
-| SRS.6 | Reference documents identified | ⬜ | — |
-| SRS.7 | Proper alignment maintained | ⬜ | — |
-| SRS.8 | Hyperlinks are correct | ⬜ | — |
-| SRS.9 | Font & size as per template | ⬜ | — |
-| SRS.10 | No spelling/grammar issues | ⬜ | — |
-| SRS.11 | Requirements are clear and unambiguous | ⬜ | — |
-| SRS.12 | No conflicting requirements | ⬜ | — |
-| SRS.13 | Requirements are testable | ⬜ | — |
-| SRS.14 | Acceptance criteria defined | ⬜ | — |
-| SRS.15 | Edge cases considered | ⬜ | — |
-| SRS.16 | All functional requirements captured | ⬜ | — |
-| SRS.17 | Non-functional requirements included | ⬜ | — |
-| SRS.18 | Dependencies identified | ⬜ | — |
-| SRS.19 | Assumptions documented | ⬜ | — |
-| SRS.20 | Requirements mapped to Feature / User Story | ⬜ | — |
-| SRS.21 | Traceability maintained | ⬜ | — |
-| SRS.22 | No orphan requirements | ⬜ | — |
+            "### 📌 Open Findings\n" +
+            "- [ ] SRS.X — [describe finding]\n\n" +
 
-### 📌 Open Findings
-- [ ] SRS.X — [describe finding]
+            "### 🏁 Decision\n" +
+            "- [ ] ✅ Approved\n" +
+            "- [ ] 🔴 Changes Requested";
 
-### 🏁 Decision
-- [ ] ✅ Approved
-- [ ] 🔴 Changes Requested
-`;
-
-            // 5. Post comment
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number,
