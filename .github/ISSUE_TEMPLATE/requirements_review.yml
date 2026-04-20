@@ -6,6 +6,304 @@ labels:
 
 body:
 
+  # ---------------- WORKFLOW GUIDE ----------------
+  - type: markdown
+    attributes:
+      value: |
+        ## 📌 Review Lifecycle — How This Works
+
+        > This follows the same model as GitHub PR reviews: request → review → rework → re-request → approve.
+        > Labels track the current state. Comments track each iteration.
+
+        | State Label | Meaning |
+        |-------------|---------|
+        | 🟡 `in-review` | Reviewer assigned, review in progress |
+        | 🔴 `rework-required` | Reviewer found issues, author must rework |
+        | 🔵 `re-review-requested` | Author completed rework, re-assigned to reviewer |
+        | 🟢 `approved` | Reviewer accepted all findings |
+
+        ---
+        ### 🔁 Iteration Flow
+
+        ```
+        Author creates issue
+              ↓
+        [Label: in-review] → Author assigns Reviewer
+              ↓
+        Reviewer posts → "🔍 Round N Review" comment
+              ↓
+           Decision?
+          /          \
+        Approve      Request Changes
+          ↓                ↓
+        [Label: approved]  [Label: rework-required]
+        Close issue        ↓
+                     Author reworks document
+                           ↓
+                     Author posts → "🔧 Rework Complete" comment
+                           ↓
+                     [Label: re-review-requested] → re-assigns Reviewer
+                           ↓
+                     Back to Reviewer (Round N+1)
+        ```
+        ---
+
+  # ---------------- ISSUE METADATA ----------------
+  - type: input
+    id: jira
+    attributes:
+      label: Jira Sub-task ID
+      placeholder: QD-123
+    validations:
+      required: true
+
+  - type: input
+    id: doc_version
+    attributes:
+      label: Document Version Under Review
+      placeholder: "e.g. v1.2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope of Review
+      description: What feature / module is being reviewed
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: Author (Document Owner)
+      placeholder: Full name of the document author
+    validations:
+      required: true
+
+  - type: input
+    id: reviewer
+    attributes:
+      label: Assigned Reviewer
+      placeholder: Full name of the reviewer
+    validations:
+      required: true
+
+  - type: input
+    id: review_date
+    attributes:
+      label: Review Requested Date
+      placeholder: "YYYY-MM-DD"
+    validations:
+      required: true
+
+  - type: textarea
+    id: remarks
+    attributes:
+      label: Author Notes for Reviewer
+      description: Context, changes since last review, or specific areas to focus on
+      placeholder: Add notes for the reviewer here
+
+  # ---------------- REVIEW ITERATION LOG ----------------
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 📋 Review Iteration Log
+        > **Author: copy this table into a comment and update after each round of rework.**
+
+        ```markdown
+        ## 🗂️ Review Iteration Log
+
+        | Round | Action | By | Date | Doc Version | Label Set |
+        |-------|--------|----|------|-------------|-----------|
+        | R1 | Review Requested | [Author] | YYYY-MM-DD | v1.2 | `in-review` |
+        | R1 | Review Complete | [Reviewer] | YYYY-MM-DD | v1.2 | `rework-required` |
+        | R2 | Rework Complete, Re-review Requested | [Author] | YYYY-MM-DD | v1.3 | `re-review-requested` |
+        | R2 | Review Complete | [Reviewer] | YYYY-MM-DD | v1.3 | `approved` |
+        ```
+        ---
+
+  # ---------------- CHECKLIST (Author pre-checks) ----------------
+  - type: checkboxes
+    id: general_checks
+    attributes:
+      label: "✅ General — Author Pre-check"
+      options:
+        - label: "SRS.1 — Document is as per template"
+        - label: "SRS.2 — Title page updated (title, version, date, config ID)"
+        - label: "SRS.3 — Document change history is maintained"
+        - label: "SRS.4 — Introduction section is clear"
+        - label: "SRS.5 — Abbreviations & definitions identified"
+        - label: "SRS.6 — Reference documents identified"
+
+  - type: checkboxes
+    id: formatting_checks
+    attributes:
+      label: "✅ Formatting & Structure — Author Pre-check"
+      options:
+        - label: "SRS.7 — Proper alignment maintained"
+        - label: "SRS.8 — Hyperlinks are correct"
+        - label: "SRS.9 — Font & size as per template"
+        - label: "SRS.10 — No spelling/grammar issues"
+
+  - type: checkboxes
+    id: quality_checks
+    attributes:
+      label: "✅ Requirement Quality — Author Pre-check"
+      options:
+        - label: "SRS.11 — Requirements are clear and unambiguous"
+        - label: "SRS.12 — No conflicting requirements"
+        - label: "SRS.13 — Requirements are testable"
+        - label: "SRS.14 — Acceptance criteria defined"
+        - label: "SRS.15 — Edge cases considered"
+
+  - type: checkboxes
+    id: completeness_checks
+    attributes:
+      label: "✅ Completeness — Author Pre-check"
+      options:
+        - label: "SRS.16 — All functional requirements captured"
+        - label: "SRS.17 — Non-functional requirements included"
+        - label: "SRS.18 — Dependencies identified"
+        - label: "SRS.19 — Assumptions documented"
+
+  - type: checkboxes
+    id: traceability_checks
+    attributes:
+      label: "✅ Traceability — Author Pre-check"
+      options:
+        - label: "SRS.20 — Requirements mapped to Feature / User Story"
+        - label: "SRS.21 — Traceability maintained"
+        - label: "SRS.22 — No orphan requirements"
+
+  # ---------------- REVIEW RESULT ----------------
+  - type: dropdown
+    id: result
+    attributes:
+      label: Initial Review Result (Author's self-assessment)
+      options:
+        - Ready for review
+        - Partially ready — known gaps exist
+    validations:
+      required: true
+
+  # ---------------- COMMENT TEMPLATES ----------------
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 💬 Comment Templates — Copy & Use After Issue is Created
+
+        ---
+
+        ### 🔍 REVIEWER: Round N Review Comment
+
+        > Copy into a new comment. Replace `N` with round number (1, 2, 3...).
+        > Set label to `rework-required` or `approved` after posting.
+
+        ```markdown
+        ## 🔍 Round N Review — [Reviewer Name] — [YYYY-MM-DD] — Doc v[X.X]
+
+        | ID | Checkpoint | Status | Finding / Remark |
+        |----|-----------|--------|-----------------|
+        | SRS.1 | Document is as per template | ✅ OK | — |
+        | SRS.2 | Title page updated | ✅ OK | — |
+        | SRS.3 | Document change history maintained | ❌ Issue | Change history missing v1.2 entry |
+        | SRS.4 | Introduction section is clear | ✅ OK | — |
+        | SRS.5 | Abbreviations & definitions identified | ❌ Issue | Acronym XYZ not defined |
+        | SRS.6 | Reference documents identified | ✅ OK | — |
+        | SRS.7 | Proper alignment maintained | ✅ OK | — |
+        | SRS.8 | Hyperlinks are correct | ❌ Issue | Link in Section 3.2 is broken |
+        | SRS.9 | Font & size as per template | ✅ OK | — |
+        | SRS.10 | No spelling/grammar issues | ✅ OK | — |
+        | SRS.11 | Requirements are clear and unambiguous | ❌ Issue | REQ-005 is ambiguous |
+        | SRS.12 | No conflicting requirements | ✅ OK | — |
+        | SRS.13 | Requirements are testable | ✅ OK | — |
+        | SRS.14 | Acceptance criteria defined | ❌ Issue | REQ-009 missing criteria |
+        | SRS.15 | Edge cases considered | ✅ OK | — |
+        | SRS.16 | All functional requirements captured | ✅ OK | — |
+        | SRS.17 | Non-functional requirements included | ❌ Issue | Performance NFR missing |
+        | SRS.18 | Dependencies identified | ✅ OK | — |
+        | SRS.19 | Assumptions documented | ✅ OK | — |
+        | SRS.20 | Requirements mapped to Feature / User Story | ❌ Issue | REQ-017 not linked |
+        | SRS.21 | Traceability maintained | ✅ OK | — |
+        | SRS.22 | No orphan requirements | ✅ OK | — |
+
+        ### 📌 Open Findings (Task List)
+        - [ ] SRS.3 — Change history missing v1.2 entry
+        - [ ] SRS.5 — Acronym XYZ not defined
+        - [ ] SRS.8 — Link in Section 3.2 is broken
+        - [ ] SRS.11 — REQ-005 is ambiguous
+        - [ ] SRS.14 — REQ-009 missing acceptance criteria
+        - [ ] SRS.17 — Performance NFR missing
+        - [ ] SRS.20 — REQ-017 not linked to user story
+
+        ### 🏁 Decision
+        <!-- select one -->
+        - [ ] ✅ **Approved** — No issues found, setting label to `approved`
+        - [ ] 🔴 **Changes Requested** — Setting label to `rework-required`, assigning back to Author
+        ```
+
+        ---
+
+        ### ✍️ AUTHOR: Response to Findings + Rework Complete
+
+        > Copy into a new comment after rework is done.
+        > Set label to `re-review-requested` and re-assign to Reviewer.
+
+        ```markdown
+        ## 🔧 Rework Complete — Round N Response — [Author Name] — [YYYY-MM-DD] — Doc v[X.X]
+
+        ### Findings Response
+
+        | Finding | Decision | Action Taken |
+        |---------|----------|-------------|
+        | SRS.3 — Change history missing v1.2 | ✅ Accepted | Updated change history in v1.3 |
+        | SRS.5 — Acronym XYZ not defined | ✅ Accepted | Added XYZ to abbreviations table |
+        | SRS.8 — Link in Section 3.2 broken | ✅ Accepted | Link fixed |
+        | SRS.11 — REQ-005 ambiguous | ❌ Not Accepted | Intentionally broad per SWE.1 scope — see comment |
+        | SRS.14 — REQ-009 missing criteria | ✅ Accepted | Acceptance criteria added in Section 4.2 |
+        | SRS.17 — Performance NFR missing | ✅ Accepted | Added NFR-003 in Section 6 |
+        | SRS.20 — REQ-017 not linked | ✅ Accepted | Linked to US-042 |
+
+        ### 📄 Document Change Summary
+        - Updated document version: v[previous] → v[new]
+        - Changed sections: _list sections changed_
+        - Not accepted findings and rationale: _explain if any_
+
+        ### ➡️ Next Action
+        - Assigning back to **[Reviewer Name]** for Round [N+1] review
+        - Label set to `re-review-requested`
+        ```
+
+        ---
+
+        ### ✅ REVIEWER: Final Approval Comment
+
+        > Copy into a comment when all findings are resolved.
+        > Set label to `approved` and close the issue.
+
+        ```markdown
+        ## ✅ Final Approval — [Reviewer Name] — [YYYY-MM-DD] — Doc v[X.X]
+
+        All findings from Round [N] have been addressed satisfactorily.
+
+        | Metric | Value |
+        |--------|-------|
+        | Total Rounds | [N] |
+        | Total Findings Raised | [count] |
+        | Accepted | [count] |
+        | Not Accepted (with rationale) | [count] |
+        | Final Document Version | v[X.X] |
+
+        **Decision: ✅ APPROVED**
+
+        Setting label to `approved`. Closing issue.
+        ```
+        ---
+
+  # ---------------- ISSUE METADATA ----------------
   - type: input
     id: jira
     attributes:
@@ -21,20 +319,6 @@ body:
       description: What feature / module is being reviewed
     validations:
       required: true
-
-  # ---------------- REVIEW METADATA TABLE ----------------
-  - type: markdown
-    attributes:
-      value: |
-        ---
-        ### 📋 Review Participants
-
-        | Role | Name | Date |
-        |------|------|------|
-        | **Author** (Document Owner) | _Fill in_ | _Fill in_ |
-        | **Reviewer** | _Fill in_ | _Fill in_ |
-
-        ---
 
   - type: input
     id: author
@@ -63,8 +347,8 @@ body:
   - type: textarea
     id: remarks
     attributes:
-      label: General Remarks
-      description: Any general remarks or context before starting the review
+      label: General Remarks (Author)
+      description: Any context or notes for the reviewer before starting
       placeholder: Add overall remarks here
 
   # ---------------- GENERAL ----------------
@@ -80,13 +364,6 @@ body:
         - label: "SRS.5 — Abbreviations & definitions identified"
         - label: "SRS.6 — Reference documents identified"
 
-  - type: textarea
-    id: general_findings
-    attributes:
-      label: "📝 General — Findings"
-      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
-      placeholder: "- [ ] Finding → Author: Name"
-
   # ---------------- FORMATTING ----------------
   - type: checkboxes
     id: formatting_checks
@@ -97,13 +374,6 @@ body:
         - label: "SRS.8 — Hyperlinks are correct"
         - label: "SRS.9 — Font & size as per template"
         - label: "SRS.10 — No spelling/grammar issues"
-
-  - type: textarea
-    id: formatting_findings
-    attributes:
-      label: "📝 Formatting & Structure — Findings"
-      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
-      placeholder: "- [ ] Finding → Author: Name"
 
   # ---------------- REQUIREMENT QUALITY ----------------
   - type: checkboxes
@@ -117,13 +387,6 @@ body:
         - label: "SRS.14 — Acceptance criteria defined"
         - label: "SRS.15 — Edge cases considered"
 
-  - type: textarea
-    id: quality_findings
-    attributes:
-      label: "📝 Requirement Quality — Findings"
-      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
-      placeholder: "- [ ] Finding → Author: Name"
-
   # ---------------- COMPLETENESS ----------------
   - type: checkboxes
     id: completeness_checks
@@ -135,13 +398,6 @@ body:
         - label: "SRS.18 — Dependencies identified"
         - label: "SRS.19 — Assumptions documented"
 
-  - type: textarea
-    id: completeness_findings
-    attributes:
-      label: "📝 Completeness — Findings"
-      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
-      placeholder: "- [ ] Finding → Author: Name"
-
   # ---------------- TRACEABILITY ----------------
   - type: checkboxes
     id: traceability_checks
@@ -152,17 +408,84 @@ body:
         - label: "SRS.21 — Traceability maintained"
         - label: "SRS.22 — No orphan requirements"
 
-  - type: textarea
-    id: traceability_findings
-    attributes:
-      label: "📝 Traceability — Findings"
-      description: "List defects found. Each line: `- [ ] Finding description → Author: Name`"
-      placeholder: "- [ ] Finding → Author: Name"
-
   # ---------------- REVIEW RESULT ----------------
   - type: dropdown
     id: result
     attributes:
+      label: Review Result
+      options:
+        - Approved
+        - Approved with comments
+        - Rework required
+    validations:
+      required: true
+
+  # ---------------- REVIEWER COMMENT TEMPLATE ----------------
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## 💬 Step 2 — Reviewer: Post a Comment with Your Findings
+
+        > After this issue is created, **copy the template below** into a new comment and fill in your findings.
+
+        ```markdown
+        ## 🔍 Review Findings — [Reviewer Name] — [YYYY-MM-DD]
+
+        | ID | Checkpoint | Status | Finding / Remark |
+        |----|-----------|--------|-----------------|
+        | SRS.1 | Document is as per template | ✅ OK | — |
+        | SRS.2 | Title page updated | ✅ OK | — |
+        | SRS.3 | Document change history maintained | ❌ Issue | Change history missing v1.2 entry |
+        | SRS.4 | Introduction section is clear | ✅ OK | — |
+        | SRS.5 | Abbreviations & definitions identified | ❌ Issue | Acronym XYZ not defined |
+        | SRS.6 | Reference documents identified | ✅ OK | — |
+        | SRS.7 | Proper alignment maintained | ✅ OK | — |
+        | SRS.8 | Hyperlinks are correct | ❌ Issue | Link in Section 3.2 is broken |
+        | SRS.9 | Font & size as per template | ✅ OK | — |
+        | SRS.10 | No spelling/grammar issues | ✅ OK | — |
+        | SRS.11 | Requirements are clear and unambiguous | ❌ Issue | REQ-005 is ambiguous |
+        | SRS.12 | No conflicting requirements | ✅ OK | — |
+        | SRS.13 | Requirements are testable | ✅ OK | — |
+        | SRS.14 | Acceptance criteria defined | ❌ Issue | REQ-009 missing criteria |
+        | SRS.15 | Edge cases considered | ✅ OK | — |
+        | SRS.16 | All functional requirements captured | ✅ OK | — |
+        | SRS.17 | Non-functional requirements included | ❌ Issue | Performance NFR missing |
+        | SRS.18 | Dependencies identified | ✅ OK | — |
+        | SRS.19 | Assumptions documented | ✅ OK | — |
+        | SRS.20 | Requirements mapped to Feature / User Story | ❌ Issue | REQ-017 not linked |
+        | SRS.21 | Traceability maintained | ✅ OK | — |
+        | SRS.22 | No orphan requirements | ✅ OK | — |
+
+        ### Findings Summary
+        - [ ] SRS.3 — Change history missing v1.2 entry
+        - [ ] SRS.5 — Acronym XYZ not defined
+        - [ ] SRS.8 — Link in Section 3.2 is broken
+        - [ ] SRS.11 — REQ-005 is ambiguous
+        - [ ] SRS.14 — REQ-009 missing acceptance criteria
+        - [ ] SRS.17 — Performance NFR missing
+        - [ ] SRS.20 — REQ-017 not linked to user story
+        ```
+
+        ---
+        ## ✍️ Step 3 — Author: Post an Acceptance Response
+
+        > After the reviewer posts findings, **copy the template below** into a new comment and mark each finding.
+
+        ```markdown
+        ## ✅ Author Response — [Author Name] — [YYYY-MM-DD]
+
+        | Finding | Decision | Action / Comment |
+        |---------|----------|-----------------|
+        | SRS.3 — Change history missing v1.2 | ✅ Accepted | Will update in v1.3 |
+        | SRS.5 — Acronym XYZ not defined | ✅ Accepted | Added to abbreviations table |
+        | SRS.8 — Link in Section 3.2 broken | ✅ Accepted | Fixed |
+        | SRS.11 — REQ-005 ambiguous | ❌ Not Accepted | REQ-005 is intentionally broad per SWE.1 scope |
+        | SRS.14 — REQ-009 missing criteria | ✅ Accepted | Criteria added |
+        | SRS.17 — Performance NFR missing | ✅ Accepted | NFR section updated |
+        | SRS.20 — REQ-017 not linked | ✅ Accepted | Linked to US-042 |
+        ```
+        ---
       label: Review Result
       options:
         - Approved
