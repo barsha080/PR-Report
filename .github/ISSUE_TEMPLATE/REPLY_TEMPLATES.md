@@ -11,40 +11,66 @@ Copy the relevant template below into a GitHub issue comment.
 ```
 ## 🔍 Round N Review — [Reviewer Name] — [YYYY-MM-DD] — Doc v[X.X]
 
-| ID | Checkpoint | Status | Finding / Remark |
-|----|-----------|--------|-----------------|
-| SRS.1 | Document is as per template | ✅ OK | — |
-| SRS.2 | Title page updated | ✅ OK | — |
-| SRS.3 | Document change history maintained | ✅ OK | — |
-| SRS.4 | Introduction section is clear | ✅ OK | — |
-| SRS.5 | Abbreviations & definitions identified | ✅ OK | — |
-| SRS.6 | Reference documents identified | ✅ OK | — |
-| SRS.7 | Proper alignment maintained | ✅ OK | — |
-| SRS.8 | Hyperlinks are correct | ✅ OK | — |
-| SRS.9 | Font & size as per template | ✅ OK | — |
-| SRS.10 | No spelling/grammar issues | ✅ OK | — |
-| SRS.11 | Requirements are clear and unambiguous | ✅ OK | — |
-| SRS.12 | No conflicting requirements | ✅ OK | — |
-| SRS.13 | Requirements are testable | ✅ OK | — |
-| SRS.14 | Acceptance criteria defined | ✅ OK | — |
-| SRS.15 | Edge cases considered | ✅ OK | — |
-| SRS.16 | All functional requirements captured | ✅ OK | — |
-| SRS.17 | Non-functional requirements included | ✅ OK | — |
-| SRS.18 | Dependencies identified | ✅ OK | — |
-| SRS.19 | Assumptions documented | ✅ OK | — |
-| SRS.20 | Requirements mapped to Feature / User Story | ✅ OK | — |
-| SRS.21 | Traceability maintained | ✅ OK | — |
-| SRS.22 | No orphan requirements | ✅ OK | — |
+name: Review Automation
 
-### 📌 Open Findings
-- [ ] SRS.X — [describe finding]
-- [ ] SRS.X — [describe finding]
+on:
+  issues:
+    types: [labeled]
 
-### 🏁 Decision
-- [ ] ✅ Approved — setting label to `approved`, closing issue
-- [ ] 🔴 Changes Requested — setting label to `rework-required`, assigning back to Author
-```
+permissions:
+  issues: write
 
+jobs:
+  auto-review-comment:
+    if: github.event.label.name == 'in-review'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add Review Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue_number = context.issue.number;
+
+            // Get existing comments
+            const comments = await github.rest.issues.listComments({
+              ...context.repo,
+              issue_number
+            });
+
+            // Calculate round number
+            let round = 1;
+            for (const c of comments.data) {
+              if (c.body && c.body.includes("Round")) {
+                round++;
+              }
+            }
+
+            // Get today's date
+            const today = new Date().toISOString().split('T')[0];
+
+            // Generic reusable template
+            const body =
+            "## 🔍 Round " + round + " Review — [Reviewer Name] — " + today + "\n\n" +
+
+            "### 📝 Feedback\n" +
+            "- ID-1 — [Finding] — Open\n" +
+            "- ID-2 — [Finding] — Accepted\n" +
+            "- ID-3 — [Finding] — Rejected\n\n" +
+
+            "👉 Add more like:\n" +
+            "- ID-X — Finding — Open/Accepted/Rejected\n\n" +
+
+            "### 🏁 Decision\n" +
+            "- [ ] ✅ Approved\n" +
+            "- [ ] 🔴 Changes Requested";
+
+            // Post comment
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number,
+              body
+            });
 ---
 
 ## 🔧 AUTHOR — Rework Complete + Findings Response
@@ -56,9 +82,9 @@ Copy the relevant template below into a GitHub issue comment.
 
 | Finding | Decision | Action Taken |
 |---------|----------|-------------|
-| SRS.X — [finding] | ✅ Accepted | [what was done] |
-| SRS.X — [finding] | ✅ Accepted | [what was done] |
-| SRS.X — [finding] | ❌ Not Accepted | [rationale] |
+| ID.X — [finding] | ✅ Accepted | [what was done] |
+| ID.X — [finding] | ✅ Accepted | [what was done] |
+| ID.X — [finding] | ❌ Not Accepted | [rationale] |
 
 ### 📄 Document Change Summary
 - Version: v[old] → v[new]
