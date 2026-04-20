@@ -4,6 +4,9 @@ on:
   issues:
     types: [labeled]
 
+permissions:
+  issues: write
+
 jobs:
   auto-review-comment:
     if: github.event.label.name == 'in-review'
@@ -11,7 +14,7 @@ jobs:
 
     steps:
       - name: Add Review Comment
-        uses: actions/github-script@v8
+        uses: actions/github-script@v7
         with:
           script: |
             const issue_number = context.issue.number;
