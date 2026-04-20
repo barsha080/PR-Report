@@ -61,9 +61,26 @@ body:
     id: reviewer
     attributes:
       label: Assigned Reviewer
-      description: "Select the reviewer's GitHub username. Also assign them via the Assignees sidebar (top-right) so they get a notification."
+      description: "Select the reviewer. Also assign them via the Assignees sidebar (top-right) so they get a notification."
       options:
-        - pending-sync
+        - Ananda Nadarajan S
+        - Barsha Sahi
+        - Ciby Bastian
+        - Dhanush K
+        - Hiteshwar Molabanti
+        - Indranil Saha
+        - Janekallu Raghukumar
+        - Mayur Agarwal
+        - Pranavi Patil
+        - Rohit Malla
+        - Saraswati Chaurasiya
+        - Shiva Kakkirala
+        - Sridhar
+        - Sudheendra Desai
+        - Sumegh Thale
+        - Suresh Chamuah
+        - Syeeda
+        - Utsav
     validations:
       required: true
 
