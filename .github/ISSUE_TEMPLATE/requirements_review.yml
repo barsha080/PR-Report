@@ -10,12 +10,19 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## ?? Review Lifecycle
-        **Author** creates issue ? **Reviewer** posts findings comment ? **Author** responds ? repeat until **Approved**
+        ## Review Lifecycle
 
-        Labels: `in-review` ? `rework-required` ? `re-review-requested` ? `approved`
+        | Step | Who | Action | Label to set |
+        |------|-----|--------|--------------|
+        | 1 | Author | Creates this issue, fills form, assigns Reviewer via **Assignees** | `in-review` |
+        | 2 | Reviewer | Posts findings using **Round N Review** template as a comment | `rework-required` or `approved` |
+        | 3 | Author | Responds to each finding, posts **Rework Complete** comment, re-assigns Reviewer | `re-review-requested` |
+        | 4 | Reviewer | Re-reviews, posts **Final Approval** comment, closes issue | `approved` |
 
-        > ?? Copy-paste comment templates are in [REPLY_TEMPLATES.md](.github/ISSUE_TEMPLATE/REPLY_TEMPLATES.md)
+        > Copy-paste comment templates: [REPLY_TEMPLATES.md](.github/ISSUE_TEMPLATE/REPLY_TEMPLATES.md)
+
+        **How to request review:** After creating the issue, use the **Assignees** field (top-right sidebar) to assign the reviewer.
+        **How to approve:** Reviewer adds label `approved` from the **Labels** sidebar and closes the issue.
         ---
 
   - type: input
@@ -111,59 +118,59 @@ body:
 
   - type: markdown
     attributes:
-      value: "---\n### ? Author Pre-check — tick items you have verified before submitting"
+      value: "---\n### Author Pre-check â€” tick items you have verified before submitting"
 
   - type: checkboxes
     id: general_checks
     attributes:
       label: "General"
       options:
-        - label: "SRS.1 — Document is as per template"
-        - label: "SRS.2 — Title page updated (title, version, date, config ID)"
-        - label: "SRS.3 — Document change history is maintained"
-        - label: "SRS.4 — Introduction section is clear"
-        - label: "SRS.5 — Abbreviations & definitions identified"
-        - label: "SRS.6 — Reference documents identified"
+        - label: "SRS.1 - Document is as per template"
+        - label: "SRS.2 - Title page updated (title, version, date, config ID)"
+        - label: "SRS.3 - Document change history is maintained"
+        - label: "SRS.4 - Introduction section is clear"
+        - label: "SRS.5 - Abbreviations & definitions identified"
+        - label: "SRS.6 - Reference documents identified"
 
   - type: checkboxes
     id: formatting_checks
     attributes:
       label: "Formatting & Structure"
       options:
-        - label: "SRS.7 — Proper alignment maintained"
-        - label: "SRS.8 — Hyperlinks are correct"
-        - label: "SRS.9 — Font & size as per template"
-        - label: "SRS.10 — No spelling/grammar issues"
+        - label: "SRS.7 - Proper alignment maintained"
+        - label: "SRS.8 - Hyperlinks are correct"
+        - label: "SRS.9 - Font & size as per template"
+        - label: "SRS.10 - No spelling/grammar issues"
 
   - type: checkboxes
     id: quality_checks
     attributes:
       label: "Requirement Quality"
       options:
-        - label: "SRS.11 — Requirements are clear and unambiguous"
-        - label: "SRS.12 — No conflicting requirements"
-        - label: "SRS.13 — Requirements are testable"
-        - label: "SRS.14 — Acceptance criteria defined"
-        - label: "SRS.15 — Edge cases considered"
+        - label: "SRS.11 - Requirements are clear and unambiguous"
+        - label: "SRS.12 - No conflicting requirements"
+        - label: "SRS.13 - Requirements are testable"
+        - label: "SRS.14 - Acceptance criteria defined"
+        - label: "SRS.15 - Edge cases considered"
 
   - type: checkboxes
     id: completeness_checks
     attributes:
       label: "Completeness"
       options:
-        - label: "SRS.16 — All functional requirements captured"
-        - label: "SRS.17 — Non-functional requirements included"
-        - label: "SRS.18 — Dependencies identified"
-        - label: "SRS.19 — Assumptions documented"
+        - label: "SRS.16 - All functional requirements captured"
+        - label: "SRS.17 - Non-functional requirements included"
+        - label: "SRS.18 - Dependencies identified"
+        - label: "SRS.19 - Assumptions documented"
 
   - type: checkboxes
     id: traceability_checks
     attributes:
       label: "Traceability"
       options:
-        - label: "SRS.20 — Requirements mapped to Feature / User Story"
-        - label: "SRS.21 — Traceability maintained"
-        - label: "SRS.22 — No orphan requirements"
+        - label: "SRS.20 - Requirements mapped to Feature / User Story"
+        - label: "SRS.21 - Traceability maintained"
+        - label: "SRS.22 - No orphan requirements"
 
   - type: dropdown
     id: result
@@ -171,6 +178,6 @@ body:
       label: Author Self-Assessment
       options:
         - Ready for review
-        - Partially ready — known gaps exist
+        - Partially ready - known gaps exist
     validations:
       required: true
