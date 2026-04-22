@@ -11,66 +11,19 @@ Copy the relevant template below into a GitHub issue comment.
 ```
 ## 🔍 Round N Review — [Reviewer Name] — [YYYY-MM-DD] — Doc v[X.X]
 
-name: Review Automation
+### 📝 Feedback
+- ID-1 — [Finding] — Open
+- ID-2 — [Finding] — Accepted
+- ID-3 — [Finding] — Rejected
 
-on:
-  issues:
-    types: [labeled]
+👉 Add more like:
+- ID-X — Finding — Open/Accepted/Rejected
 
-permissions:
-  issues: write
+### 🏁 Decision
+- [ ] ✅ Approved
+- [ ] 🔴 Changes Requested
+```
 
-jobs:
-  auto-review-comment:
-    if: github.event.label.name == 'in-review'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Add Review Comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const issue_number = context.issue.number;
-
-            // Get existing comments
-            const comments = await github.rest.issues.listComments({
-              ...context.repo,
-              issue_number
-            });
-
-            // Calculate round number
-            let round = 1;
-            for (const c of comments.data) {
-              if (c.body && c.body.includes("Round")) {
-                round++;
-              }
-            }
-
-            // Get today's date
-            const today = new Date().toISOString().split('T')[0];
-
-            // Generic reusable template
-            const body =
-            "## 🔍 Round " + round + " Review — [Reviewer Name] — " + today + "\n\n" +
-
-            "### 📝 Feedback\n" +
-            "- ID-1 — [Finding] — Open\n" +
-            "- ID-2 — [Finding] — Accepted\n" +
-            "- ID-3 — [Finding] — Rejected\n\n" +
-
-            "👉 Add more like:\n" +
-            "- ID-X — Finding — Open/Accepted/Rejected\n\n" +
-
-            "### 🏁 Decision\n" +
-            "- [ ] ✅ Approved\n" +
-            "- [ ] 🔴 Changes Requested";
-
-            // Post comment
-            await github.rest.issues.createComment({
-              ...context.repo,
-              issue_number,
-              body
-            });
 ---
 
 ## 🔧 AUTHOR — Rework Complete + Findings Response

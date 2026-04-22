@@ -25,13 +25,17 @@ jobs:
               issue_number
             });
 
-            // Calculate round number
-            let round = 1;
+            // Calculate round numbers based on completed "🔍 Round N Review" comments
+            let completedRounds = 0;
             for (const c of comments.data) {
-              if (c.body && c.body.includes("Round")) {
-                round++;
+              if (c.body && c.body.includes("🔍 Round")) {
+                completedRounds++;
               }
             }
+            // nextRound: the upcoming review round number (for new review or re-review)
+            // currentRound: the most recent completed round (for rework references)
+            const nextRound = completedRounds + 1;
+            const currentRound = Math.max(1, completedRounds);
 
             const today = new Date().toISOString().split('T')[0];
 
@@ -39,9 +43,18 @@ jobs:
             if (label === "in-review") {
 
               const body =
-              "## 🔍 Round " + round + " Review — " + today + "\n\n" +
-              "Add your feedback below:\n" +
-              "- ID-X — Finding — Open/Accepted/Rejected";
+                "## 🔍 Round " + nextRound + " Review — " + today + "\n\n" +
+                "### 📝 Feedback\n" +
+                "- ID-1 — [Finding] — Open\n" +
+                "- ID-2 — [Finding] — Accepted\n" +
+                "- ID-3 — [Finding] — Rejected\n\n" +
+                "👉 Add more findings like:\n" +
+                "- ID-X — Finding — Open/Accepted/Rejected\n\n" +
+                "### 🏁 Decision\n" +
+                "> Set label to `rework-required` or `approved` after completing review.\n\n" +
+                "- [ ] ✅ Approved\n" +
+                "- [ ] 🔴 Changes Requested\n\n" +
+                "_Copy-paste template: [REPLY_TEMPLATES.md](.github/ISSUE_TEMPLATE/REPLY_TEMPLATES.md)_";
 
               await github.rest.issues.createComment({
                 ...context.repo,
@@ -50,7 +63,45 @@ jobs:
               });
             }
 
-            // 👉 CASE 2: Approved → Close Issue
+            // 👉 CASE 2: Rework Required → Notify Author
+            if (label === "rework-required") {
+
+              const body =
+                "## 🔴 Rework Required\n\n" +
+                "The reviewer has requested changes. Please:\n\n" +
+                "1. Address each finding listed in the review comment above\n" +
+                "2. Post a **Rework Complete** comment using the template in " +
+                "[REPLY_TEMPLATES.md](.github/ISSUE_TEMPLATE/REPLY_TEMPLATES.md)\n" +
+                "3. Set the label to `re-review-requested` and re-assign to the reviewer\n\n" +
+                "_Round " + currentRound + " rework requested on " + today + "._";
+
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number,
+                body
+              });
+            }
+
+            // 👉 CASE 3: Re-review Requested → Notify Reviewer
+            if (label === "re-review-requested") {
+
+              const body =
+                "## 🔁 Re-review Requested — Round " + nextRound + "\n\n" +
+                "The author has completed rework. Please:\n\n" +
+                "1. Review the author's **Rework Complete** response above\n" +
+                "2. Post a new **Round " + nextRound + " Review** comment using the template in " +
+                "[REPLY_TEMPLATES.md](.github/ISSUE_TEMPLATE/REPLY_TEMPLATES.md)\n" +
+                "3. Set the label to `rework-required` or `approved` accordingly\n\n" +
+                "_Re-review requested on " + today + "._";
+
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number,
+                body
+              });
+            }
+
+            // 👉 CASE 4: Approved → Close Issue
             if (label === "approved") {
 
               await github.rest.issues.createComment({
