@@ -1,3 +1,9 @@
+# (c) Qorix 2026
+# Review automation for Requirements Review and Design Review issues.
+# Uses only bash + curl — no external actions required.
+#
+# Deploy to: .github/workflows/review-automation.yml
+
 name: Simple Review Automation
 
 on:
@@ -9,59 +15,67 @@ permissions:
 
 jobs:
   review-flow:
+    # Only run for requirement review, design review, code review, or unit test review issues
+    if: |
+      contains(github.event.issue.labels.*.name, 'requirement review') ||
+      contains(github.event.issue.labels.*.name, 'design review') ||
+      contains(github.event.issue.labels.*.name, 'code review') ||
+      contains(github.event.issue.labels.*.name, 'unit test review')
     runs-on: ubuntu-latest
 
     steps:
-      - name: Handle Review Flow
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const issue_number = context.issue.number;
-            const label = context.payload.label.name;
+      - name: Handle in-review label
+        if: github.event.label.name == 'in-review'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
 
-            // Get existing comments
-            const comments = await github.rest.issues.listComments({
-              ...context.repo,
-              issue_number
-            });
+          # Count how many "Round" comments already exist to determine round number.
+          # Fetches up to 100 pages to handle issues with many comments.
+          ROUND=0
+          PAGE=1
+          while true; do
+            PAGE_COMMENTS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPO/issues/$ISSUE_NUMBER/comments?per_page=100&page=$PAGE")
+            # Count occurrences of the heading pattern written by this workflow
+            COUNT=$(echo "$PAGE_COMMENTS" | grep -o '## Round' | wc -l)
+            ROUND=$((ROUND + COUNT))
+            # Stop when the page returns fewer than 100 entries (last page)
+            ITEMS=$(echo "$PAGE_COMMENTS" | grep -o '"id":' | wc -l)
+            if [ "$ITEMS" -lt 100 ]; then break; fi
+            PAGE=$((PAGE + 1))
+          done
+          ROUND=$((ROUND + 1))
 
-            // Calculate round number
-            let round = 1;
-            for (const c of comments.data) {
-              if (c.body && c.body.includes("Round")) {
-                round++;
-              }
-            }
+          BODY="## Round $ROUND Review — $TODAY\n\nAdd your feedback below:\n- ID-X — Finding — Open/Accepted/Rejected"
 
-            const today = new Date().toISOString().split('T')[0];
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/issues/$ISSUE_NUMBER/comments" \
+            -d "{\"body\": \"$BODY\"}"
 
-            // 👉 CASE 1: Start Review
-            if (label === "in-review") {
+      - name: Handle approved label — comment and close
+        if: github.event.label.name == 'approved'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Post approval comment
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/issues/$ISSUE_NUMBER/comments" \
+            -d '{"body": "Approved. Closing this issue."}'
 
-              const body =
-              "## 🔍 Round " + round + " Review — " + today + "\n\n" +
-              "Add your feedback below:\n" +
-              "- ID-X — Finding — Open/Accepted/Rejected";
-
-              await github.rest.issues.createComment({
-                ...context.repo,
-                issue_number,
-                body
-              });
-            }
-
-            // 👉 CASE 2: Approved → Close Issue
-            if (label === "approved") {
-
-              await github.rest.issues.createComment({
-                ...context.repo,
-                issue_number,
-                body: "✅ Approved. Closing this issue."
-              });
-
-              await github.rest.issues.update({
-                ...context.repo,
-                issue_number,
-                state: "closed"
-              });
-            }
+          # Close the issue
+          curl -s -X PATCH \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/issues/$ISSUE_NUMBER" \
+            -d '{"state": "closed"}'
