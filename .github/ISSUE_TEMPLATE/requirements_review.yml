@@ -53,9 +53,8 @@ body:
     id: author
     attributes:
       label: Author (Document Owner)
-      placeholder: "Your name"
-    validations:
-      required: true
+      description: "Auto-populated with your GitHub username when the issue is created. Leave blank."
+      placeholder: "Auto-filled on submission"
 
   - type: dropdown
     id: reviewer
@@ -90,9 +89,8 @@ body:
     id: review_date
     attributes:
       label: Review Requested Date
-      placeholder: "YYYY-MM-DD"
-    validations:
-      required: true
+      description: "Auto-populated with today's date when the issue is created. Leave blank."
+      placeholder: "Auto-filled on submission"
 
   - type: textarea
     id: remarks
