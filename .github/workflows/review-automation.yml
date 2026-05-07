@@ -8,7 +8,7 @@ name: Simple Review Automation
 
 on:
   issues:
-    types: [labeled]
+    types: [labeled, opened]
 
 permissions:
   issues: write
@@ -24,6 +24,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Auto-fill date and author on issue open
+        if: github.event.action == 'opened'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.event.issue.user.login }}
+        run: |
+          python3 << 'PYEOF'
+          import json, urllib.request, os, re
+          from datetime import datetime, timezone
+
+          token  = os.environ['GH_TOKEN']
+          repo   = os.environ['REPO']
+          number = os.environ['ISSUE_NUMBER']
+          actor  = os.environ['ACTOR']
+          today  = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+
+          # Fetch current issue body
+          req  = urllib.request.Request(
+              f'https://api.github.com/repos/{repo}/issues/{number}',
+              headers={'Authorization': f'Bearer {token}',
+                       'Accept': 'application/vnd.github+json'})
+          body = json.loads(urllib.request.urlopen(req).read()).get('body') or ''
+
+          # Replace _No response_ under the two auto-fill fields
+          body = re.sub(
+              r'(### Review Requested Date\s*\n+)_No response_',
+              rf'\g<1>{today}', body)
+          body = re.sub(
+              r'(### Author \(Document Owner\)\s*\n+)_No response_',
+              rf'\g<1>{actor}', body)
+
+          # Patch the issue
+          data = json.dumps({'body': body}).encode()
+          patch = urllib.request.Request(
+              f'https://api.github.com/repos/{repo}/issues/{number}',
+              data=data, method='PATCH',
+              headers={'Authorization': f'Bearer {token}',
+                       'Accept': 'application/vnd.github+json',
+                       'Content-Type': 'application/json'})
+          urllib.request.urlopen(patch)
+          print(f'Auto-filled: date={today}, author={actor}')
+          PYEOF
+
       - name: Handle in-review label
         if: github.event.label.name == 'in-review'
         env:
@@ -33,22 +78,12 @@ jobs:
         run: |
           TODAY=$(date -u +%Y-%m-%d)
 
-          # Count how many "Round" comments already exist to determine round number.
-          # Fetches up to 100 pages to handle issues with many comments.
-          ROUND=0
-          PAGE=1
-          while true; do
-            PAGE_COMMENTS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-              -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/$REPO/issues/$ISSUE_NUMBER/comments?per_page=100&page=$PAGE")
-            # Count occurrences of the heading pattern written by this workflow
-            COUNT=$(echo "$PAGE_COMMENTS" | grep -o '## Round' | wc -l)
-            ROUND=$((ROUND + COUNT))
-            # Stop when the page returns fewer than 100 entries (last page)
-            ITEMS=$(echo "$PAGE_COMMENTS" | grep -o '"id":' | wc -l)
-            if [ "$ITEMS" -lt 100 ]; then break; fi
-            PAGE=$((PAGE + 1))
-          done
+          # Count how many "Round" comments already exist to determine round number
+          COMMENTS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/issues/$ISSUE_NUMBER/comments?per_page=100")
+
+          ROUND=$(echo "$COMMENTS" | grep -o '"Round' | wc -l)
           ROUND=$((ROUND + 1))
 
           BODY="## Round $ROUND Review — $TODAY\n\nAdd your feedback below:\n- ID-X — Finding — Open/Accepted/Rejected"
