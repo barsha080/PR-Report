@@ -63,8 +63,26 @@ body:
       label: Assigned Reviewer
       description: "Select the reviewer. Also assign them via the Assignees sidebar (top-right) so they get a notification."
       options:
-        - barsha080
-        - savithas-qorix
+        - Ananda Nadarajan S
+        - Anitha G
+        - Barsha Sahi
+        - Ciby Bastian
+        - Dhanush K
+        - Hiteshwar Molabanti
+        - Soujanya Patil
+        - Janekallu Raghukumar
+        - Mayur Agarwal
+        - Pranavi Patil
+        - Rohit Malla
+        - Saraswati Chaurasiya
+        - Shiva Kakkirala
+        - Sridhar
+        - Sudheendra Desai
+        - Sumegh Thale
+        - Suresh Chamuah
+        - Syeeda
+        - Utsav
+        - Pooja Ajagond
     validations:
       required: true
 
@@ -92,22 +110,21 @@ body:
     attributes:
       label: "General"
       options:
-        - label: "SRS.1 - Document is as per template"
+        - label: "SRS.1 - Document is as per rst template"
         - label: "SRS.2 - Title page updated (title, version, date, config ID)"
-        - label: "SRS.3 - Document change history is maintained"
-        - label: "SRS.4 - Introduction section is clear"
+        - label: "SRS.3 - Document change log is maintained"
+        - label: "SRS.4 - Purpose & Scope is clear"
         - label: "SRS.5 - Abbreviations & definitions identified"
-        - label: "SRS.6 - Reference documents identified"
+        - label: "SRS.6 - Relationship to parent document is identified & captured"
 
   - type: checkboxes
     id: formatting_checks
     attributes:
       label: "Formatting & Structure"
       options:
-        - label: "SRS.7 - Proper alignment maintained"
+        - label: "SRS.7 - Proper alignment maintained as per rst"
         - label: "SRS.8 - Hyperlinks are correct"
-        - label: "SRS.9 - Font & size as per template"
-        - label: "SRS.10 - No spelling/grammar issues"
+        - label: "SRS.9 - No spelling/grammar issues"
 
   - type: checkboxes
     id: quality_checks
@@ -115,29 +132,25 @@ body:
       label: "Requirement Quality"
       options:
         - label: "SRS.11 - Requirements are clear and unambiguous"
-        - label: "SRS.12 - No conflicting requirements"
+        - label: "SRS.12 - No conflicting/duplicate requirements"
         - label: "SRS.13 - Requirements are testable"
-        - label: "SRS.14 - Acceptance criteria defined"
-        - label: "SRS.15 - Edge cases considered"
+        - label: "SRS.14 - All parameters should be maintained for specific requirement"
+        - label: "SRS.15 - Requirement type should be Function or Non Function"
+        - label: "SRS.16 - Use SHALL / SHOULD / MAY per RFC 2119"
+        - label: "SRS.17 - Requirement ID has to be unique"
+        - label: "SRS.18 - Each requirement has :status: field (draft | reviewed | approved | Deprecated)"
+        - label: "SRS.19 - Rationale field provided for each requirement"
+        - label: "SRS.20 - Traceability matrix section or separate traceability.rst file included"
 
   - type: checkboxes
     id: completeness_checks
     attributes:
       label: "Completeness"
       options:
-        - label: "SRS.16 - All functional requirements captured"
-        - label: "SRS.17 - Non-functional requirements included"
-        - label: "SRS.18 - Dependencies identified"
-        - label: "SRS.19 - Assumptions documented"
-
-  - type: checkboxes
-    id: traceability_checks
-    attributes:
-      label: "Traceability"
-      options:
-        - label: "SRS.20 - Requirements mapped to Feature / User Story"
-        - label: "SRS.21 - Traceability maintained"
-        - label: "SRS.22 - No orphan requirements"
+        - label: "SRS.18 - All functional requirements included"
+        - label: "SRS.19 - Non-functional requirements included"
+        - label: "SRS.20 - parent ID, Implemented by ID, Links incoming, Jira identified & captured"
+        - label: "SRS.21 - Edge Cases to be identified/captured"
 
   - type: dropdown
     id: result
