@@ -62,26 +62,8 @@ body:
       label: Assigned Reviewer
       description: "Select the reviewer. Also assign them via the Assignees sidebar (top-right) so they get a notification."
       options:
-        - Ananda Nadarajan S
-        - Anitha G
-        - Barsha Sahi
-        - Ciby Bastian
-        - Dhanush K
-        - Hiteshwar Molabanti
-        - Soujanya Patil
-        - Janekallu Raghukumar
-        - Mayur Agarwal
-        - Pranavi Patil
-        - Rohit Malla
-        - Saraswati Chaurasiya
-        - Shiva Kakkirala
-        - Sridhar
-        - Sudheendra Desai
-        - Sumegh Thale
-        - Suresh Chamuah
-        - Syeeda
-        - Utsav
-        - Pooja Ajagond
+        - barsha080
+        - savithas-qorix
     validations:
       required: true
 
