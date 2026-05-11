@@ -70,8 +70,26 @@ body:
       label: Assigned Reviewer
       description: "Select the reviewer. Also assign them via the Assignees sidebar (top-right) so they get a notification."
       options:
-        - barsha080
-        - savithas-qorix
+        - Ananda Nadarajan S
+        - Anitha G
+        - Barsha Sahi
+        - Ciby Bastian
+        - Dhanush K
+        - Hiteshwar Molabanti
+        - Indranil Saha
+        - Soujanya Patil
+        - Mayur Agarwal
+        - Pranavi Patil
+        - Rohit Malla
+        - Saraswati Chaurasiya
+        - Shiva Kakkirala
+        - Sridhar
+        - Sudheendra Desai
+        - Sumegh Thale
+        - Suresh Chamuah
+        - Syeeda
+        - Utsav
+        - Pooja Ajagond
     validations:
       required: true
 
@@ -95,185 +113,118 @@ body:
       value: "---\n### Author Pre-check — tick items you have verified before submitting"
 
   # ---------------------------------------------------------------------------
-  # Section 1: General
+  # Section 1: Document Structure & Meta-Information
   # ---------------------------------------------------------------------------
   - type: checkboxes
-    id: general_checks
+    id: doc_checks
     attributes:
-      label: "1. General"
+      label: "1. Document Structure & Meta-Information"
       options:
-        - label: "TR_SDD.1 - Document quality checked: name, spell check, consistency, section numbering, font"
-        - label: "TR_SDD.2 - System/Document Overview contains a brief description of the module and purpose of the document"
-        - label: "TR_SDD.3 - Change history includes: description of changes with authorization and requirement IDs; all columns filled; date is the approved store date"
-        - label: "TR_SDD.4 - Controlling and reference documents identified correctly in table format"
-        - label: "TR_SDD.5 - Unused or missing abbreviations and acronyms identified"
-        - label: "TR_SDD.6 - Abbreviations and acronyms listed in alphabetical table format"
-        - label: "TR_SDD.7 - All blocks (class, Datatype, Constraints etc.) filled with White Colour"
-        - label: "TR_SDD.8 - All requirement IDs converted into Design Elements"
+        - label: "DOC.1 - Document header complete (ID, Version, Status, Owner, Approval)"
+        - label: "DOC.2 - Change history/changelog with dates, authors, descriptions"
+        - label: "DOC.3 - Parent documents referenced (SWE.1 requirements, SWE.2 architecture)"
+        - label: "DOC.4 - Table of contents with correct depth"
+        - label: "DOC.5 - Abbreviations/acronyms section present and complete"
+        - label: "DOC.6 - Purpose and scope clearly defined"
+        - label: "DOC.7 - RST source compiles cleanly (sphinx-build -W) with zero warnings"
 
   # ---------------------------------------------------------------------------
-  # Section 2: Quality & Configuration Management
+  # Section 2: Architecture & Module Structure
   # ---------------------------------------------------------------------------
   - type: checkboxes
-    id: qcm_checks
+    id: arch_checks
     attributes:
-      label: "2. Quality & Configuration Management"
+      label: "2. Architecture & Module Structure"
       options:
-        - label: "TR_SDD.9 - All pages numbered in correct sequence"
-        - label: "TR_SDD.10 - Bi-Directional Traceability exists and is correct"
-        - label: "TR_SDD.11 - Traceability Matrices appear in the relevant sections"
-        - label: "TR_SDD.12 - Every figure and table is numbered and appears in Table of Figures, Charts and Graphs"
-        - label: "TR_SDD.13 - Contents are consistent with what was planned in the SDPS"
+        - label: "ARCH.1 - Module decomposition diagrams present for all subsystems"
+        - label: "ARCH.2 - Diagram notation explained (Mermaid/UML)"
+        - label: "ARCH.3 - All modules have descriptive names"
+        - label: "ARCH.4 - Module responsibilities documented"
+        - label: "ARCH.5 - Performance constraints specified"
 
   # ---------------------------------------------------------------------------
-  # Section 3: Specific to HLD
+  # Section 3: Module Specifications
   # ---------------------------------------------------------------------------
   - type: checkboxes
-    id: hld_checks
+    id: mod_checks
     attributes:
-      label: "3. Specific to HLD"
+      label: "3. Module Specifications"
       options:
-        - label: "TR_SDD.14 - Design Decisions include Design ID, Requirement ID, Rationale and Implications"
-        - label: "TR_SDD.15 - Design Decisions are understandable, genuinely required and can be implemented"
-        - label: "TR_SDD.16 - Component name in section 4.1 depicts the feature(s) covered by the component"
-        - label: "TR_SDD.17 - Identified component name is in the required format"
-        - label: "TR_SDD.18 - Description for each component is sufficient to understand its functionality and role"
-        - label: "TR_SDD.19 - Design ID provided for each package as specified in template"
-        - label: "TR_SDD.20 - Requirement ID provided for package or class as specified in template"
-        - label: "TR_SDD.21 - All interfacing modules listed in Overview of Interfaces between module and other modules"
-        - label: "TR_SDD.22 - Concept of execution covers all neighbouring module and SW-C interactions"
-        - label: "TR_SDD.23 - File inclusions verified to avoid multiple file inclusions"
-        - label: "TR_SDD.24 - Dependencies for each file provided in Tag Value sections (filled with NA if no dependencies)"
+        - label: "MOD.1 - Signature documented (parameters, return type)"
+        - label: "MOD.2 - Purpose clearly stated"
+        - label: "MOD.3 - Preconditions documented"
+        - label: "MOD.4 - Postconditions documented"
+        - label: "MOD.5 - Algorithm described (steps or pseudocode)"
+        - label: "MOD.6 - Error cases documented"
+        - label: "MOD.7 - SWE.1 requirement(s) traced"
+        - label: "MOD.8 - Unit test ID(s) referenced"
 
   # ---------------------------------------------------------------------------
-  # Section 4: Hardware Independent & Dependent Modules (common portion)
+  # Section 4: Traceability
   # ---------------------------------------------------------------------------
   - type: checkboxes
-    id: hw_common_checks
+    id: trace_checks
     attributes:
-      label: "4. Hardware Independent & Dependent Modules"
+      label: "4. Traceability"
       options:
-        - label: "TR_SDD.25 - Features in Concept of Execution Package (4.3) are individually covered in Detailed Concept Flow (5.1)"
-        - label: "TR_SDD.26 - Detailed description provided for each concept of execution of the module"
-        - label: "TR_SDD.27 - Sequence, Interaction, Activity or State diagram provided to depict how functionality is achieved"
-        - label: "TR_SDD.28 - Tag Values for each package, class, data type, global variable, structure and macro given as per template"
-        - label: "TR_SDD.29 - Attributes for each package listed as per template"
-        - label: "TR_SDD.30 - Forward paths in sequence diagram are continuous lines; return paths are dotted lines"
-        - label: "TR_SDD.31 - API/Function name shown on forward path; return value on return path (write Return() if function has no return value)"
-        - label: "TR_SDD.32 - Naming convention followed per QORIX C Programming guidelines for struct tags, variable names, data types and macro names"
-        - label: "TR_SDD.33 - All Imported Data Types and Type Definitions captured"
-        - label: "TR_SDD.34 - Pre-compile options and macros given correctly"
-        - label: "TR_SDD.35 - All global variables and constants captured"
-        - label: "TR_SDD.36 - Non-Volatility of each Global Variable defined in Tag Value"
-        - label: "TR_SDD.37 - Data types of all structure elements are compatible and portable across all platforms and compilers"
-        - label: "TR_SDD.38 - All structures clearly explained including significance of each element; structure elements added as Attributes"
-        - label: "TR_SDD.39 - Each member of every structure explained properly"
-        - label: "TR_SDD.40 - Structures use elements optimally with no data duplication; note provided if duplication is needed for throughput"
-        - label: "TR_SDD.41 - Structure elements ordered by descending size (struct, uint32, pointer, uint16, uint8, boolean)"
-        - label: "TR_SDD.42 - Names for pre-compile options, macros, structures, members and global variables are relevant and imply correct meaning"
-        - label: "TR_SDD.43 - DET and DEM errors correctly specified; package is blank if no errors exist (OS errors are not reported to DET)"
-        - label: "TR_SDD.44 - Details for all tool-generated files captured"
-        - label: "TR_SDD.45 - Explanation for all API, callback and internal functions provided clearly"
-        - label: "TR_SDD.46 - Keyword macros for compiler abstraction used with correct memory class and pointer class"
-        - label: "TR_SDD.47 - Input, Output and Return parameters correctly identified for all functions"
-        - label: "TR_SDD.48 - No indefinite loops in the flow"
-        - label: "TR_SDD.49 - Function flow is optimized for less memory usage and high throughput"
-        - label: "TR_SDD.50 - Sequence of DET checks is consistent with other modules"
-        - label: "TR_SDD.51 - Pointer/variable initialization in DET checks is correct; registers appropriately updated when DET is disabled"
-        - label: "TR_SDD.52 - Datatype of variables chosen to avoid wasting RAM or stack memory"
-        - label: "TR_SDD.53 - Data structures have no unused parameters or fields; all parameters are used or justified"
-        - label: "TR_SDD.54 - IO data structure offsets carefully analyzed against device header files and CPU manual"
-        - label: "TR_SDD.55 - Global pointers initialized in Msn_Init; if Msn_Init is not called, they are initialized before the DET check"
-        - label: "TR_SDD.56 - Structures under pre-compile checks will not become empty under any combination; whole structure wrapped in combined check if needed"
-        - label: "TR_SDD.57 - Hardware register update/init: all notes and cautions analyzed and implemented; unclear items discussed with customer and documented in issue tracker"
-        - label: "TR_SDD.58 - Internal header files not included in published header files; approvals obtained if inclusion is required"
-        - label: "TR_SDD.59 - Cyclomatic complexity is <= 20"
-        - label: "TR_SDD.60 - No idle loops used for timing purposes (software design must not rely on instruction counting)"
-        - label: "TR_SDD.61 - Consistency checks provided in section 6 are sufficient"
-        - label: "TR_SDD.62 - Tag Value descriptions for error, warning and information messages are clear and understandable"
+        - label: "TRACE.1 - Traceability matrix: SWE.3 → SWE.1"
+        - label: "TRACE.2 - Traceability matrix: SWE.3 → SWE.4 (unit tests)"
+        - label: "TRACE.3 - Every SWE.1 requirement covered by design element"
+        - label: "TRACE.4 - Every design element traces to SWE.1 requirement"
 
   # ---------------------------------------------------------------------------
-  # Section 4b: Hardware Dependent Modules (additional checks)
+  # Section 5: Unit Test Specifications
   # ---------------------------------------------------------------------------
   - type: checkboxes
-    id: hw_dependent_checks
+    id: test_checks
     attributes:
-      label: "4b. Hardware Dependent Modules (additional)"
+      label: "5. Unit Test Specifications"
       options:
-        - label: "TR_SDD.64 - Hardware manual requirements applicable to the module are covered in the design"
-        - label: "TR_SDD.65 - Register name, bit name and bit value are mentioned correctly"
-        - label: "TR_SDD.66 - Register access details (byte or bit access) provided correctly as a note"
-        - label: "TR_SDD.67 - Initializations of all registers required by the driver are clearly shown in the flow"
-        - label: "TR_SDD.68 - Correct file name provided for embedded output file templates"
-        - label: "TR_SDD.69 - Register update/init: notes and cautions analyzed and implemented; unclear items discussed with customer and documented"
-        - label: "TR_SDD.70 - Multiple iterations over hardware registers do not violate access conditions of any bit"
+        - label: "TEST.1 - All unit tests have unique IDs as per defined template"
+        - label: "TEST.2 - Each test: description, SWE.1 ref, module, expected result"
+        - label: "TEST.3 - Tests cover success and failure paths"
+        - label: "TEST.4 - Boundary conditions tested"
+        - label: "TEST.5 - Test coverage target specified (coverage TBD)"
+        - label: "TEST.6 - Test tooling documented (cargo test, jest)"
 
   # ---------------------------------------------------------------------------
-  # Section 6: Specific to Flowchart / Activity Diagram
+  # Section 6: Documentation Completeness
   # ---------------------------------------------------------------------------
   - type: checkboxes
-    id: flowchart_checks
+    id: compl_checks
     attributes:
-      label: "6. Flowchart / Activity Diagram"
+      label: "6. Documentation Completeness"
       options:
-        - label: "TR_SDD.71 - Function name provided in the top-right corner of the diagram"
-        - label: "TR_SDD.72 - Pre-compile check noted in top-right corner if any API is under a pre-compile check"
-        - label: "TR_SDD.73 - Flow of every function is continuous and complete"
-        - label: "TR_SDD.74 - Connecting lines do not cross over more than once; proper connectors used"
-        - label: "TR_SDD.75 - Decision boxes cover both Yes and No options"
-        - label: "TR_SDD.76 - Labels Yes and No are placed at the middle of their respective connectors"
-        - label: "TR_SDD.77 - Each process, sub-process and data block has exactly one input and one output"
-        - label: "TR_SDD.78 - Summing point used to cascade multiple inputs to a single block"
-        - label: "TR_SDD.79 - Fixed Black-and-White colouring scheme followed for decision boxes, summing points, off-page references, START/STOP and Sub Process blocks"
-        - label: "TR_SDD.80 - No semicolons or backslashes present in the flowchart"
-        - label: "TR_SDD.81 - Font is as per the standard template"
-        - label: "TR_SDD.82 - Text is confined (fits) within each box"
-        - label: "TR_SDD.83 - All arrows are straight"
-        - label: "TR_SDD.84 - All OFF PAGE REFERENCE icons within a file are placed in the same direction"
-        - label: "TR_SDD.85 - OFF PAGE REFERENCE numbering starts from 1 and is sequential"
-        - label: "TR_SDD.86 - ON PAGE REFERENCE numbering starts from A and is sequential per page"
-        - label: "TR_SDD.87 - Flowchart drawn and saved within the template"
-        - label: "TR_SDD.88 - Flow is in a single line and page is not over-populated"
-        - label: "TR_SDD.89 - Activity element used for Activity; Action->Call Operation element used for function calls"
-        - label: "TR_SDD.90 - Initial element used for START; Final element used for STOP"
-        - label: "TR_SDD.91 - Decision boxes: conditions preceded by 'Is'; pre-processor conditions in Bold; normal conditions in Regular"
-        - label: "TR_SDD.92 - No dead code or redundant code in activity diagram"
-        - label: "TR_SDD.93 - No local variables present inside Activity Diagram / Flow Chart"
+        - label: "COMPL.1 - No placeholder sections (remove \"TBD\", \"omitted\", \"TODO\" without tracking)"
+        - label: "COMPL.2 - All purpose statements completed"
+        - label: "COMPL.3 - All error cases documented"
+        - label: "COMPL.4 - Open issues section up-to-date"
 
   # ---------------------------------------------------------------------------
-  # Section 7: Specific to Harmonization
+  # Section 7: Validation & Error Handling
   # ---------------------------------------------------------------------------
   - type: checkboxes
-    id: harmonization_checks
+    id: val_checks
     attributes:
-      label: "7. Harmonization"
+      label: "7. Validation & Error Handling"
       options:
-        - label: "TR_SDD.94 - List of all interfaces with their attributes is provided"
-        - label: "TR_SDD.95 - Tag value details are understandable"
-        - label: "TR_SDD.96 - Harmonization details provided for all logical harmonizing parameters and containers"
-        - label: "TR_SDD.97 - Port names are unique and correctly provided as per SWS"
-        - label: "TR_SDD.98 - All possible checks covered in the Consistency Check section for Extract"
-        - label: "TR_SDD.99 - Error, Warning and Information messages contain path for the Class or element in Extract"
+        - label: "VAL.1 - All validation rules have unique codes"
+        - label: "VAL.2 - Each rule has severity level (Error, Warning, Info)"
+        - label: "VAL.3 - Rule trigger conditions documented"
+        - label: "VAL.4 - Actionable error messages documented"
+        - label: "VAL.5 - Cross-file validation dependencies identified"
 
   # ---------------------------------------------------------------------------
-  # Section 8: Miscellaneous
+  # Section 8: Code Quality
   # ---------------------------------------------------------------------------
   - type: checkboxes
-    id: misc_checks
+    id: qa_checks
     attributes:
-      label: "8. Miscellaneous"
+      label: "8. Code Quality"
       options:
-        - label: "TR_SDD.100 - Any deviation from template has a Deviation Number with Product Owner approval"
-        - label: "TR_SDD.101 - No unused or extra design elements; design is clean and maintainable"
-        - label: "TR_SDD.102 - No gap in traceability; justification available for any identified gap"
-        - label: "TR_SDD.103 - Design document adheres to the template"
-
-  - type: textarea
-    id: others
-    attributes:
-      label: "TR_SDD.104 - Others / Additional Observations"
-      description: Any additional findings or observations not covered by the checklist above
-      placeholder: List any additional observations here
+        - label: "QA.1 - CI/CD checks"
+        - label: "QA.2 - Code review requirements specified (approvals, CODEOWNERS)"
+        - label: "QA.5 - Unsafe code policy documented"
 
   - type: dropdown
     id: result
