@@ -1,0 +1,251 @@
+# (c) Qorix 2026
+# GitHub Issue Form template for Code Review.
+# Checklist is aligned with ASPICE 4.0 SWE.3 work product requirements.
+# Review Type is indicated per item: [M] = Manual, [A] = Automated (tool-assisted).
+# Items are numbered sequentially CR.1 - CR.55 across all sections.
+#
+# Deploy to: .github/ISSUE_TEMPLATE/code_review.yml
+
+name: Code Review
+description: Source Code Review Checklist (SWE.3 compliant)
+title: "[Code TRC] QD-XXX Code Review"
+labels:
+  - "code review"
+  - "in-review"
+
+body:
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Review Lifecycle
+
+        | Step | Who | Action | Label to set |
+        |------|-----|--------|--------------|
+        | 1 | Author | Creates this issue, fills form, assigns Reviewer via **Assignees** | `in-review` |
+        | 2 | Reviewer | Posts findings using **Round N Review** template as a comment | `rework-required` or `approved` |
+        | 3 | Author | Responds to each finding, posts **Rework Complete** comment, re-assigns Reviewer | `re-review-requested` |
+        | 4 | Reviewer | Re-reviews, posts **Final Approval** comment, closes issue | `approved` |
+
+        > Copy-paste comment templates: [REPLY_TEMPLATES.md](.github/ISSUE_TEMPLATE/REPLY_TEMPLATES.md)
+
+        **How to request review:** After creating the issue, use the **Assignees** field (top-right sidebar) to assign the reviewer.
+        **How to approve:** Reviewer adds label `approved` from the **Labels** sidebar and closes the issue.
+
+        > **Legend:** `[M]` = Manual check &nbsp;&nbsp; `[A]` = Automated / tool-assisted check
+        ---
+
+  - type: input
+    id: jira
+    attributes:
+      label: Jira Sub-task ID
+      placeholder: QD-123
+    validations:
+      required: true
+
+  - type: input
+    id: doc_version
+    attributes:
+      label: Document Version Under Review
+      placeholder: "e.g. v1.2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope of Review
+      description: What module / component / source file(s) are being reviewed
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: Author (Document Owner)
+      placeholder: "Your name"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reviewer
+    attributes:
+      label: Assigned Reviewer
+      description: "Select the reviewer. Also assign them via the Assignees sidebar (top-right) so they get a notification."
+      options:
+        - Ananda Nadarajan S
+        - Anitha G
+        - Barsha Sahi
+        - Ciby Bastian
+        - Dhanush K
+        - Hiteshwar Molabanti
+        - Soujanya Patil
+        - Janekallu Raghukumar
+        - Mayur Agarwal
+        - Pranavi Patil
+        - Rohit Malla
+        - Saraswati Chaurasiya
+        - Shiva Kakkirala
+        - Sridhar
+        - Sudheendra Desai
+        - Sumegh Thale
+        - Suresh Chamuah
+        - Syeeda
+        - Utsav
+        - Pooja Ajagond
+    validations:
+      required: true
+
+  - type: input
+    id: review_date
+    attributes:
+      label: Review Requested Date
+      placeholder: "YYYY-MM-DD"
+    validations:
+      required: true
+
+  - type: textarea
+    id: remarks
+    attributes:
+      label: Author Notes for Reviewer
+      description: Context, changes since last review, or specific areas to focus on
+      placeholder: Add notes for the reviewer here
+
+  - type: markdown
+    attributes:
+      value: "---\n### Author Pre-check — tick items you have verified before submitting"
+
+  # ---------------------------------------------------------------------------
+  # Section 1: General & Technical Review  (CR.1 – CR.20)
+  # ---------------------------------------------------------------------------
+  - type: checkboxes
+    id: general_checks
+    attributes:
+      label: "1. General & Technical Review"
+      options:
+        - label: "CR.1 - Code is clean, readable, and follows project coding standards"
+        - label: "CR.2 - Proper formatting and indentation are maintained throughout the code"
+        - label: "CR.3 - No unused imports, variables, dead code, commented-out code, or debug statements"
+        - label: "CR.4 - Proper comments/documentation are added for complex logic and critical flows"
+        - label: "CR.5 - Variable, function, class, and component names are meaningful and consistent"
+        - label: "CR.6 - No hardcoded secrets, credentials, tokens, or environment-specific values"
+        - label: "CR.7 - Proper error handling and input validation are implemented"
+        - label: "CR.8 - Avoid deeply nested loops and multiple unnecessary if-else conditions"
+        - label: "CR.9 - Duplicate logic/code is avoided; reusable methods/components are preferred"
+        - label: "CR.10 - Boundary/null/undefined checks are handled appropriately"
+        - label: "CR.11 - Logging is implemented appropriately; unnecessary console/print statements are avoided"
+        - label: "CR.12 - Performance-impacting operations and unnecessary API/database calls are avoided"
+        - label: "CR.13 - Proper modularization and separation of concerns are followed"
+        - label: "CR.14 - Static analysis, linting, and formatting checks pass successfully"
+        - label: "CR.15 - Unit tests are added/updated where applicable and existing tests pass successfully"
+        - label: "CR.16 - Code is optimized for speed and size"
+        - label: "CR.17 - No redundant or unreachable code"
+        - label: "CR.18 - No possible deadlock in the code"
+        - label: "CR.19 - Declaration and prototype of every function is correct"
+        - label: "CR.20 - Nested comments are not used"
+
+  # ---------------------------------------------------------------------------
+  # Section 2: Rust Review  (CR.21 – CR.25)
+  # ---------------------------------------------------------------------------
+  - type: checkboxes
+    id: rust_checks
+    attributes:
+      label: "2. Rust Review"
+      options:
+        - label: "CR.21 - cargo fmt and cargo clippy pass without critical warnings"
+        - label: "CR.22 - Avoid unnecessary cloning, allocations, and complex nested conditions"
+        - label: "CR.23 - unsafe blocks are minimized and properly justified"
+        - label: "CR.24 - Proper error handling implemented using Result; avoid unnecessary panics"
+        - label: "CR.25 - Ownership, borrowing, and concurrency handling are correct"
+
+  # ---------------------------------------------------------------------------
+  # Section 3: React & TypeScript Review  (CR.26 – CR.30)
+  # ---------------------------------------------------------------------------
+  - type: checkboxes
+    id: react_checks
+    attributes:
+      label: "3. React & TypeScript Review"
+      options:
+        - label: "CR.26 - ESLint, TypeScript checks, and Prettier pass successfully"
+        - label: "CR.27 - Avoid unnecessary re-renders, deeply nested components, and complex conditional rendering"
+        - label: "CR.28 - React hooks and state management are implemented correctly"
+        - label: "CR.29 - API calls and async operations include proper error handling"
+        - label: "CR.30 - Components are modular, reusable, and properly typed"
+
+  # ---------------------------------------------------------------------------
+  # Section 4: Python Review  (CR.31 – CR.35)
+  # ---------------------------------------------------------------------------
+  - type: checkboxes
+    id: python_checks
+    attributes:
+      label: "4. Python Review"
+      options:
+        - label: "CR.31 - black and ruff/flake8 checks pass successfully"
+        - label: "CR.32 - Follow PEP8 style guide"
+        - label: "CR.33 - Proper exception handling implemented; avoid silent failures"
+        - label: "CR.34 - Provide docstrings for all public functions, classes, and modules"
+        - label: "CR.35 - Functions and modules are modular, readable, and maintainable"
+
+  # ---------------------------------------------------------------------------
+  # Section 5: Java Review  (CR.36 – CR.40)
+  # ---------------------------------------------------------------------------
+  - type: checkboxes
+    id: java_checks
+    attributes:
+      label: "5. Java Review"
+      options:
+        - label: "CR.36 - Code passes Checkstyle/SpotBugs/SonarLint without critical issues"
+        - label: "CR.37 - Avoid deeply nested loops and multiple unnecessary if-else conditions"
+        - label: "CR.38 - Proper exception handling implemented; avoid empty catch blocks"
+        - label: "CR.39 - Classes and methods are modular and follow clean object-oriented design"
+        - label: "CR.40 - Proper logging framework used; avoid System.out.println debug statements"
+
+  # ---------------------------------------------------------------------------
+  # Section 6: Quality & Configuration Management  (CR.41 – CR.46)
+  # ---------------------------------------------------------------------------
+  - type: checkboxes
+    id: qcm_checks
+    attributes:
+      label: "6. Quality & Configuration Management"
+      options:
+        - label: "CR.41 - Source code is committed to the approved version control repository with proper branch management"
+        - label: "CR.42 - All code changes are linked to valid JIRA/task IDs and reviewed through pull requests"
+        - label: "CR.43 - Proper versioning is maintained for source code, APIs, and configuration files"
+        - label: "CR.44 - No unnecessary/generated/temp files (node_modules, build artifacts, zip files, logs) are committed"
+        - label: "CR.45 - Code review comments and review actions are properly addressed before merge"
+        - label: "CR.46 - Zip folders are avoided; direct folders are committed"
+
+  # ---------------------------------------------------------------------------
+  # Section 7: Execution of Verification Tools  (CR.47 – CR.51)
+  # ---------------------------------------------------------------------------
+  - type: checkboxes
+    id: verification_checks
+    attributes:
+      label: "7. Execution of Verification Tools"
+      options:
+        - label: "CR.47 - All files compile without errors or warnings"
+        - label: "CR.48 - Polyspace Cyclomatic Complexity: all functions <= 20; any function > 20 has documented approval; errors have comments in the Remarks column"
+        - label: "CR.49 - SLOC performed: no tabs, no trailing spaces, no lines exceeding 80 characters"
+        - label: "CR.50 - Code verified with code analysis tools; no warnings/errors; approved justification provided for any remaining items"
+        - label: "CR.51 - Comment percentage is within KPI threshold 20-50%; duplication percentage is within 0-5%"
+
+  # ---------------------------------------------------------------------------
+  # Section 8: Traceability Sheet  (CR.52 – CR.53)
+  # ---------------------------------------------------------------------------
+  - type: checkboxes
+    id: traceability_checks
+    attributes:
+      label: "8. Traceability Sheet"
+      options:
+        - label: "CR.52 - Design Requirements SDD IDs provided at end of Traceability and mapped to Code File Name"
+        - label: "CR.53 - Justification provided for any unmapped Design ID"
+
+  - type: dropdown
+    id: result
+    attributes:
+      label: Author Self-Assessment
+      options:
+        - Ready for review
+        - Partially ready - known gaps exist
+    validations:
+      required: true
